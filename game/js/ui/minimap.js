@@ -1,166 +1,126 @@
-// Cinder Coast minimap: circular radar, full-screen map.
+// Cinder Coast minimap: circular map, roads, water, markers, police blips.
+// Fresh Stage 2 write from BRIEF-04.
 (function () {
   var CC = window.CinderCoast;
-  var fullOpen = false;
-  function drawRadar(ctx, size) {
+  function worldToMap(x, z, size, range) {
     var S = CC.S;
-    if (!S) return;
-    var range = 220;
-    ctx.clearRect(0, 0, size, size);
-    ctx.save();
-    ctx.beginPath(); ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2); ctx.clip();
-    ctx.fillStyle = '#0E2A3A'; ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#2BB3B0'; ctx.fillRect(0, size * 0.82, size, size * 0.18);
-    var scale = size / (range * 2);
-    var cx = size / 2, cy = size / 2;
-    var rot = S.northUp ? 0 : -CC.camera3.getYaw();
-    function toMap(x, z) {
-      var dx = (x - S.player.x) * scale, dz = (z - S.player.z) * scale;
-      var rx = dx * Math.cos(rot) - dz * Math.sin(rot);
-      var rz = dx * Math.sin(rot) + dz * Math.cos(rot);
-      return { x: cx + rx, y: cy + rz };
-    }
-    ctx.strokeStyle = '#8A8F98'; ctx.lineWidth = 3;
-    CC.city.roads.forEach(function (r) {
-      var a = toMap(r.axis === 'ew' ? r.from : r.at, r.axis === 'ew' ? r.at : r.from);
-      var b = toMap(r.axis === 'ew' ? r.to : r.at, r.axis === 'ew' ? r.at : r.to);
-      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    });
-    if (S.waypoint) {
-      var w = toMap(S.waypoint.x, S.waypoint.z);
-      ctx.fillStyle = '#FFD166';
-      ctx.beginPath(); ctx.arc(w.x, w.y, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#1F3A5F'; ctx.lineWidth = 2; ctx.stroke();
-      if (S.activity) {
-        ctx.strokeStyle = '#2B7FFF'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(w.x, w.y, 10, 0, Math.PI * 2); ctx.stroke();
-      }
-    }
-    if (S.heli) {
-      var hp = toMap(S.heli.mesh.position.x, S.heli.mesh.position.z);
-      ctx.fillStyle = '#E0433A';
-      ctx.beginPath(); ctx.arc(hp.x, hp.y, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#F4E6C8'; ctx.lineWidth = 2; ctx.stroke();
-    }
-    if (S.roadblock) {
-      S.roadblock.units.forEach(function (u) {
-        var rp = toMap(u.x, u.z);
-        ctx.fillStyle = '#E0433A';
-        ctx.beginPath(); ctx.arc(rp.x, rp.y, 4, 0, Math.PI * 2); ctx.fill();
-      });
-    }
-    if (S.police) {
-      S.police.forEach(function (u) {
-        var p = toMap(u.x, u.z);
-        ctx.fillStyle = (Math.floor(S.time * 3) % 2 === 0) ? '#E0433A' : '#FF6B5E';
-        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
-      });
-    }
-    if (S.vehicle && S.vehicle.hot) {
-      ctx.fillStyle = '#E0433A';
-      ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2); ctx.stroke();
-    }
-    ctx.fillStyle = '#F4E6C8';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - 8); ctx.lineTo(cx + 6, cy + 6); ctx.lineTo(cx - 6, cy + 6); ctx.closePath(); ctx.fill();
-    ctx.restore();
-    ctx.strokeStyle = '#F4E6C8'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2); ctx.stroke();
+    var cx = S ? S.player.x : 0, cz = S ? S.player.z : 0;
+    var px = size / 2 + (x - cx) / range * (size / 2);
+    var py = size / 2 + (z - cz) / range * (size / 2);
+    return [px, py];
   }
   CC.minimap = {
     draw: function () {
-      var cv = document.getElementById('minimap');
-      if (!cv) return;
-      var ctx = cv.getContext('2d');
-      drawRadar(ctx, cv.width);
-      if (fullOpen) CC.minimap.drawFull();
-    },
-    drawFull: function () {
-      var cv = document.getElementById('fullmap-canvas');
-      if (!cv) return;
-      var ctx = cv.getContext('2d');
       var S = CC.S;
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      ctx.fillStyle = '#12303F'; ctx.fillRect(0, 0, cv.width, cv.height);
-      ctx.fillStyle = '#2BB3B0'; ctx.fillRect(0, cv.height * 0.72, cv.width, cv.height * 0.28);
-      function toMap(x, z) {
-        return { x: (x + 360) / 720 * cv.width, y: (z + 600) / 1160 * cv.height };
-      }
-      ctx.strokeStyle = '#8A8F98'; ctx.lineWidth = 4;
+      var cv = document.getElementById('minimap');
+      if (!cv || !S) return;
+      var ctx = cv.getContext('2d');
+      var size = cv.width, range = 220;
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.fillStyle = '#0E2A3A';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#2BB3B0';
+      ctx.fillRect(0, 0, size, size * 0.08);
+      ctx.strokeStyle = '#5A5A66';
+      ctx.lineWidth = 3;
       CC.city.roads.forEach(function (r) {
-        var a = toMap(r.axis === 'ew' ? r.from : r.at, r.axis === 'ew' ? r.at : r.from);
-        var b = toMap(r.axis === 'ew' ? r.to : r.at, r.axis === 'ew' ? r.at : r.to);
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.beginPath();
+        var a = worldToMap(r.axis === 'ew' ? r.from : r.at, r.axis === 'ew' ? r.at : r.from, size, range);
+        var b = worldToMap(r.axis === 'ew' ? r.to : r.at, r.axis === 'ew' ? r.at : r.to, size, range);
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(b[0], b[1]);
+        ctx.stroke();
       });
-      ctx.font = 'bold 15px system-ui, sans-serif'; ctx.fillStyle = '#F4E6C8';
-      CC.config.districts.forEach(function (d) {
-        var p = toMap(d.x, d.z);
-        var unlocked = CC.progress ? CC.progress.districtUnlocked(d.name) : true;
-        if (unlocked) {
-          ctx.fillStyle = '#F4E6C8';
-          ctx.fillText(d.name, p.x - 40, p.y);
-        } else {
-          ctx.fillStyle = 'rgba(244,230,200,0.45)';
-          ctx.fillText(d.name + ' — LOCKED (Ch ' + d.unlockChapter + ')', p.x - 40, p.y);
-        }
+      function blip(x, z, colour, r, pulse) {
+        var p = worldToMap(x, z, size, range);
+        if (p[0] < -10 || p[0] > size + 10 || p[1] < -10 || p[1] > size + 10) return;
+        ctx.fillStyle = colour;
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], pulse ? r + Math.sin(S.time * 6) * 1.5 : r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (S.objective) blip(S.objective.tx, S.objective.tz, '#FFD166', 6, false);
+      var act = CC.activities ? CC.activities.marker() : null;
+      if (act) blip(act.x, act.z, '#2B5F9E', 5, false);
+      if (S.police) S.police.forEach(function (u) {
+        blip(u.x, u.z, '#E0433A', 4, true);
       });
+      if (S.vehicle && S.vehicle.hot) blip(S.vehicle.x, S.vehicle.z, '#F2A81D', 4, true);
+      var pp = worldToMap(S.player.x, S.player.z, size, range);
+      ctx.fillStyle = '#F4E6C8';
+      ctx.beginPath();
+      ctx.moveTo(pp[0], pp[1] - 7);
+      ctx.lineTo(pp[0] - 5, pp[1] + 5);
+      ctx.lineTo(pp[0] + 5, pp[1] + 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  };
+})();
+
+// Minimap helpers: full-map canvas drawing shared with the menu map.
+(function () {
+  var CC = window.CinderCoast;
+  CC.minimap.drawFull = function (canvas) {
+    var S = CC.S;
+    if (!canvas || !S) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    ctx.fillStyle = '#12303F';
+    ctx.fillRect(0, 0, W, H);
+    function mx(x) { return (x + 340) / 680 * W; }
+    function mz(z) { return (z + 570) / 900 * H; }
+    ctx.fillStyle = '#2BB3B0';
+    ctx.fillRect(mx(330), 0, W - mx(330), H);
+    ctx.fillRect(0, H - mz(340), W, H);
+    ctx.strokeStyle = '#5A5A66';
+    ctx.lineWidth = 2;
+    CC.city.roads.forEach(function (r) {
+      ctx.beginPath();
+      if (r.axis === 'ew') { ctx.moveTo(mx(r.from), mz(r.at)); ctx.lineTo(mx(r.to), mz(r.at)); }
+      else { ctx.moveTo(mx(r.at), mz(r.from)); ctx.lineTo(mx(r.at), mz(r.to)); }
+      ctx.stroke();
+    });
+    ctx.strokeStyle = '#FFD166';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(mx(-13), mz(-480), mx(13) - mx(-13), mz(-160) - mz(-480));
+    ctx.font = 'bold 15px system-ui, sans-serif';
+    CC.config.districts.forEach(function (d) {
+      var locked = CC.progression && !CC.progression.districtUnlocked(d.id);
+      ctx.fillStyle = locked ? '#8A8F98' : '#F4E6C8';
+      ctx.fillText(d.name + (locked ? ' (locked)' : ''), mx(d.cx) - 40, mz(d.cz));
+    });
+    ctx.fillStyle = '#FFD166';
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.fillText('Halo Tower', mx(60) - 30, mz(0) - 8);
+    ctx.fillText('Glasswing Hotel', mx(240) - 40, mz(80) - 8);
+    ctx.fillText('Pier Nine', mx(-280) - 25, mz(-280) - 8);
+    ctx.fillText('Funicular', mx(40) - 25, mz(-480) - 8);
+    if (S.objective) {
       ctx.fillStyle = '#FFD166';
-      CC.config.landmarks.forEach(function (l) {
-        var p = toMap(l.x, l.z);
-        ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#F4E6C8'; ctx.fillText(l.name, p.x + 8, p.y + 4); ctx.fillStyle = '#FFD166';
-      });
-      // Gun shop and safehouses.
-      ctx.font = '13px system-ui, sans-serif';
-      var gs = toMap(CC.config.gunShop.at.x, CC.config.gunShop.at.z);
-      ctx.fillStyle = '#5E9A4A'; ctx.fillRect(gs.x - 4, gs.y - 4, 8, 8);
-      ctx.fillStyle = '#F4E6C8'; ctx.fillText('Gun Shop', gs.x + 8, gs.y + 4);
-      CC.config.safehouses.forEach(function (h) {
-        var sp = toMap(h.x, h.z);
-        ctx.fillStyle = '#7FC4E0'; ctx.fillRect(sp.x - 4, sp.y - 4, 8, 8);
-        ctx.fillStyle = '#F4E6C8'; ctx.fillText(h.name, sp.x + 8, sp.y + 4);
-      });
-      if (S && S.activity) {
-        var ap = toMap(S.waypoint.x, S.waypoint.z);
-        ctx.fillStyle = '#2B7FFF';
-        ctx.beginPath(); ctx.arc(ap.x, ap.y, 7, 0, Math.PI * 2); ctx.fill();
-      }
-      if (S && S.police) {
-        S.police.forEach(function (u) {
-          var pp = toMap(u.x, u.z);
-          ctx.fillStyle = (Math.floor(S.time * 3) % 2 === 0) ? '#E0433A' : '#FF6B5E';
-          ctx.beginPath(); ctx.arc(pp.x, pp.y, 4, 0, Math.PI * 2); ctx.fill();
-        });
-      }
-      if (S && S.heli) {
-        var hp2 = toMap(S.heli.mesh.position.x, S.heli.mesh.position.z);
-        ctx.fillStyle = '#E0433A';
-        ctx.beginPath(); ctx.arc(hp2.x, hp2.y, 6, 0, Math.PI * 2); ctx.fill();
-      }
-      if (S && S.waypoint) {
-        var w = toMap(S.waypoint.x, S.waypoint.z);
-        ctx.strokeStyle = '#FFD166'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(w.x, w.y, 10, 0, Math.PI * 2); ctx.stroke();
-        var pp = toMap(S.player.x, S.player.z);
-        ctx.beginPath(); ctx.moveTo(pp.x, pp.y); ctx.lineTo(w.x, w.y); ctx.stroke();
-      }
-      if (S) {
-        var pp2 = toMap(S.player.x, S.player.z);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath(); ctx.arc(pp2.x, pp2.y, 6, 0, Math.PI * 2); ctx.fill();
-      }
-    },
-    toggleFull: function () {
-      fullOpen = !fullOpen;
-      var f = document.getElementById('fullmap');
-      if (f) f.style.display = fullOpen ? 'flex' : 'none';
-      if (fullOpen) CC.minimap.drawFull();
-    },
-    closeFull: function () {
-      fullOpen = false;
-      var f = document.getElementById('fullmap');
-      if (f) f.style.display = 'none';
-    },
-    isFullOpen: function () { return fullOpen; }
+      ctx.beginPath();
+      ctx.arc(mx(S.objective.tx), mz(S.objective.tz), 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#FFD166';
+      ctx.beginPath();
+      ctx.moveTo(mx(S.player.x), mz(S.player.z));
+      ctx.lineTo(mx(S.objective.tx), mz(S.objective.tz));
+      ctx.stroke();
+    }
+    if (S.police) S.police.forEach(function (u) {
+      ctx.fillStyle = '#E0433A';
+      ctx.beginPath();
+      ctx.arc(mx(u.x), mz(u.z), 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.fillStyle = '#F4E6C8';
+    ctx.beginPath();
+    ctx.arc(mx(S.player.x), mz(S.player.z), 6, 0, Math.PI * 2);
+    ctx.fill();
   };
 })();

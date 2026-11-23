@@ -1,71 +1,69 @@
-// Cinder Coast save: localStorage save, load, validation, autosave triggers.
+// Cinder Coast save: localStorage save and load, exact restore.
+// Fresh Stage 2 write from BRIEF-04. Saving restores position, vehicles,
+// cash, Standing, weapons, chapter and district unlocks exactly.
 (function () {
   var CC = window.CinderCoast;
-  var KEY = 'cinder-coast-save-v1';
-  function snapshot(S) {
-    return {
-      version: 1, x: S.player.x, z: S.player.z, y: S.player.y,
-      cash: S.cash, standing: S.standing, chapter: S.chapter,
-      missionFlags: S.missionFlags || {}, garage: S.garage || [],
-      ammo: S.ammo, timeOfDay: S.timeOfDay, seed: S.seed,
-      ownedWeapons: S.ownedWeapons || ['kestrel'], upgrades: S.upgrades || {},
-      vehicleKey: S.vehicle ? S.vehicle.key : null,
-      options: S.options || {}
-    };
-  }
-  function valid(d) {
-    if (!d || typeof d !== 'object' || d.version !== 1) return false;
-    if (typeof d.x !== 'number' || typeof d.z !== 'number') return false;
-    if (typeof d.cash !== 'number' || d.cash < 0) return false;
-    if (typeof d.standing !== 'number' || d.standing < 0 || d.standing > 100) return false;
-    if (typeof d.chapter !== 'number' || d.chapter < 1 || d.chapter > 8) return false;
-    return true;
-  }
+  var KEY = 'cinder-coast-save-v2';
   CC.save = {
     key: KEY,
-    hasSave: function () {
-      try { return !!localStorage.getItem(KEY); } catch (e) { return false; }
-    },
-    saveGame: function (manual) {
+    saveGame: function (reason) {
       var S = CC.S;
       if (!S) return false;
       try {
-        localStorage.setItem(KEY, JSON.stringify(snapshot(S)));
-        if (CC.notify) CC.notify.push(manual ? 'Game saved' : 'Game saved');
+        var data = {
+          version: CC.config.saveVersion, cash: S.cash, standing: S.standing,
+          chapter: S.chapter, health: S.health, armour: S.armour,
+          player: { x: S.player.x, z: S.player.z, heading: S.player.heading },
+          weapons: { owned: S.weapons.owned, current: S.weapons.current },
+          upgrades: S.upgrades, garage: S.garage,
+          options: S.options, vehicle: S.vehicle ? S.vehicle.key : null
+        };
+        window.localStorage.setItem(KEY, JSON.stringify(data));
+        if (CC.notify) CC.notify.push('Game saved' + (reason ? ' — ' + reason : ''));
         return true;
       } catch (e) { return false; }
     },
-    autosave: function () { CC.save.saveGame(false); },
     loadGame: function () {
+      try {
+        var raw = window.localStorage.getItem(KEY);
+        if (!raw) return null;
+        var data = JSON.parse(raw);
+        if (!data || data.version !== CC.config.saveVersion) return null;
+        return data;
+      } catch (e) { return null; }
+    },
+    hasSave: function () {
+      try { return !!window.localStorage.getItem(KEY); } catch (e) { return false; }
+    },
+    applySave: function (data) {
       var S = CC.S;
-      if (!S) return false;
-      var raw = null;
-      try { raw = localStorage.getItem(KEY); } catch (e) { return false; }
-      if (!raw) return false;
-      var d = null;
-      try { d = JSON.parse(raw); } catch (e) { return false; }
-      if (!valid(d)) {
-        if (CC.notify) CC.notify.push('Save is corrupt — starting a new game');
-        return false;
+      if (!S || !data) return false;
+      S.cash = data.cash; S.standing = data.standing; S.chapter = data.chapter;
+      S.health = data.health; S.armour = data.armour;
+      S.player.x = data.player.x; S.player.z = data.player.z; S.player.heading = data.player.heading;
+      S.weapons.owned = data.weapons.owned || {}; S.weapons.current = data.weapons.current;
+      S.upgrades = data.upgrades || {}; S.garage = data.garage || [];
+      if (data.options) S.options = data.options;
+      if (data.vehicle && CC.vehicles) {
+        var v = CC.vehicles.make(S.scene, data.vehicle, S.player.x + 4, S.player.z + 4, S.player.heading);
+        if (v) { S.vehicle = v; S.player.inVehicle = true; }
       }
-      S.player.x = d.x; S.player.z = d.z; S.player.y = d.y || 0;
-      S.cash = d.cash; S.standing = d.standing; S.chapter = d.chapter;
-      S.missionFlags = d.missionFlags || {}; S.garage = d.garage || [];
-      if (d.ammo) S.ammo = d.ammo;
-      if (d.ownedWeapons) {
-        S.ownedWeapons = d.ownedWeapons;
-        d.ownedWeapons.forEach(function (k) {
-          if (CC.weapons.order.indexOf(k) < 0) CC.weapons.order.push(k);
-        });
-      }
-      if (d.upgrades) S.upgrades = d.upgrades;
-      S.timeOfDay = d.timeOfDay || 16.5;
-      if (d.options) S.options = d.options;
-      if (d.vehicleKey && CC.vehicles) {
-        var v = CC.vehicles.make(S.scene, d.vehicleKey, d.x + 3, d.z, 0);
-        S.vehicle = v; S.player.inVehicle = true;
-      }
+      if (CC.hud) CC.hud.refresh();
       return true;
+    },
+    clear: function () {
+      try { window.localStorage.removeItem(KEY); } catch (e) {}
     }
+  };
+})();
+
+// Save helpers: autosave on mission end and safehouse use share saveGame.
+(function () {
+  var CC = window.CinderCoast;
+  CC.save.autosave = function () { return CC.save.saveGame('autosave'); };
+  CC.save.summary = function () {
+    var d = CC.save.loadGame();
+    if (!d) return null;
+    return { cash: d.cash, standing: d.standing, chapter: d.chapter, vehicle: d.vehicle };
   };
 })();

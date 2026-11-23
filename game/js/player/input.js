@@ -1,74 +1,94 @@
-// Cinder Coast input: keyboard and mouse, pointer lock, key bindings.
+// Cinder Coast input: keyboard, mouse aim and fire, pause and map keys.
+// Fresh Stage 2 write from BRIEF-04.
 (function () {
   var CC = window.CinderCoast;
   var keys = {};
-  var input = {
+  var state = {
     forward: false, back: false, left: false, right: false,
-    sprint: false, jump: false, handbrake: false, aim: false,
-    horn: false, interact: false, enter: false
+    sprint: false, jump: false, handbrake: false,
+    aiming: false, firing: false, interact: false
   };
-  var pressed = {};
+  function sync() {
+    state.forward = !!(keys['KeyW'] || keys['ArrowUp']);
+    state.back = !!(keys['KeyS'] || keys['ArrowDown']);
+    state.left = !!(keys['KeyA'] || keys['ArrowLeft']);
+    state.right = !!(keys['KeyD'] || keys['ArrowRight']);
+    state.sprint = !!keys['ShiftLeft'] || !!keys['ShiftRight'];
+    state.jump = !!keys['Space'];
+    state.handbrake = !!keys['KeyX'];
+    state.firing = !!keys['Mouse0'];
+    state.aiming = !!keys['Mouse2'];
+  }
   CC.input = {
-    keys: keys, state: input, pressed: pressed,
-    bind: function (canvas) {
+    state: state,
+    init: function () {
       window.addEventListener('keydown', function (e) {
-        if (e.repeat) return;
-        keys[e.code] = true; pressed[e.code] = true;
-        if (['Space', 'ArrowUp', 'ArrowDown'].indexOf(e.code) >= 0) e.preventDefault();
-        if (e.code === 'Escape') CC.menu.togglePause();
-        if (e.code === 'KeyM') CC.minimap.toggleFull();
-        if (e.code === 'KeyC') CC.camera3.cycleMode();
-        if (e.code === 'KeyR') CC.weapons.reload();
-        if (e.code === 'KeyE') input.enter = true;
-        if (e.code === 'KeyF') input.interact = true;
-        if (e.code === 'KeyH') { input.horn = true; if (CC.sfx) CC.sfx.honk(); }
-        if (e.code === 'Digit1') CC.weapons.select(0);
-        if (e.code === 'Digit2') CC.weapons.select(1);
-        if (e.code === 'Digit3') CC.weapons.select(2);
-        if (e.code === 'Digit4') CC.weapons.select(3);
-        if (e.code === 'Digit5') CC.weapons.select(4);
-        if (CC.audio) CC.audio.unlock();
+        keys[e.code] = true;
+        sync();
+        var S = CC.S;
+        if (!S) return;
+        if (e.code === 'KeyF') CC.input.tryHijack();
+        if (e.code === 'KeyE') CC.input.tryInteract();
+        if (e.code === 'KeyR' && CC.weapons) CC.weapons.startReload();
+        if (e.code === 'KeyQ' && CC.weapons) CC.weapons.cycle();
+        if (e.code === 'KeyV' && CC.camera3) CC.camera3.cycleMode();
+        if (e.code === 'KeyM' && S.mode === 'play' && CC.menu) CC.menu.showMap();
+        if ((e.code === 'Escape' || e.code === 'KeyP') && S.mode === 'play' && CC.menu) CC.menu.showPause();
+        if (e.code === 'Space') e.preventDefault();
       });
-      window.addEventListener('keyup', function (e) { keys[e.code] = false; });
-      canvas.addEventListener('click', function () {
-        if (CC.S && CC.S.mode === 'play' && !CC.S.shotMode) canvas.requestPointerLock();
-        if (CC.audio) CC.audio.unlock();
-      });
-      document.addEventListener('mousemove', function (e) {
-        if (document.pointerLockElement === canvas) {
-          CC.camera3.orbit(e.movementX, e.movementY);
-        }
-      });
-      canvas.addEventListener('mousedown', function (e) {
-        if (e.button === 0) pressed.Mouse0 = true;
-        if (e.button === 2) input.aim = true;
+      window.addEventListener('keyup', function (e) { keys[e.code] = false; sync(); });
+      window.addEventListener('mousedown', function (e) {
+        if (e.button === 0) keys['Mouse0'] = true;
+        if (e.button === 2) keys['Mouse2'] = true;
+        sync();
       });
       window.addEventListener('mouseup', function (e) {
-        if (e.button === 2) input.aim = false;
+        if (e.button === 0) keys['Mouse0'] = false;
+        if (e.button === 2) keys['Mouse2'] = false;
+        sync();
       });
-      canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
-      window.addEventListener('wheel', function (e) {
-        if (e.deltaY > 0) CC.weapons.cycle(1); else CC.weapons.cycle(-1);
-      }, { passive: true });
+      window.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+      window.addEventListener('mousemove', function (e) {
+        var S = CC.S;
+        if (!S || S.mode !== 'play') return;
+        if (CC.camera3 && (state.aiming || e.buttons === 0)) CC.camera3.orbit(e.movementX || 0, e.movementY || 0);
+      });
     },
-    poll: function () {
-      input.forward = !!(keys.KeyW || keys.ArrowUp);
-      input.back = !!(keys.KeyS || keys.ArrowDown);
-      input.left = !!(keys.KeyA || keys.ArrowLeft);
-      input.right = !!(keys.KeyD || keys.ArrowRight);
-      input.sprint = !!keys.ShiftLeft || !!keys.ShiftRight;
-      input.jump = !!keys.Space;
-      input.handbrake = !!keys.Space;
-      return input;
+    tryHijack: function () {
+      var S = CC.S;
+      if (!S || S.mode !== 'play' || S.vehicle) return;
+      if (CC.ownership) CC.ownership.tryHijack();
     },
-    consume: function (code) {
-      var v = !!pressed[code];
-      pressed[code] = false;
-      return v;
-    },
-    clearTransient: function () {
-      input.enter = false; input.interact = false; input.horn = false;
-      pressed.Mouse0 = false;
+    tryInteract: function () {
+      var S = CC.S;
+      if (!S || S.mode !== 'play') return;
+      if (S.vehicle) { if (CC.ownership) CC.ownership.exitVehicle(); return; }
+      if (CC.progression) {
+        var sh = CC.progression.nearestSafehouse(10);
+        if (sh) { CC.progression.useSafehouse(); return; }
+      }
+      var S2 = S;
+      var gd = Math.hypot(CC.config.gunShop.x - S2.player.x, CC.config.gunShop.z - S2.player.z);
+      if (gd < 10 && CC.menu) { CC.menu.showShop('gun'); return; }
+      var gr = Math.hypot(CC.config.garage.x - S2.player.x, CC.config.garage.z - S2.player.z);
+      if (gr < 10 && CC.menu) { CC.menu.showShop('garage'); return; }
+      if (CC.enemies) CC.enemies.melee();
     }
+  };
+})();
+
+// Input helpers: prompt text for the nearest interaction.
+(function () {
+  var CC = window.CinderCoast;
+  CC.input.nearestPrompt = function () {
+    var S = CC.S;
+    if (!S || S.mode !== 'play') return '';
+    if (S.vehicle) return 'E: Exit vehicle';
+    if (CC.vehicles && CC.vehicles.nearestParked(S.player.x, S.player.z, 4)) return 'F: Hijack';
+    if (CC.progression && CC.progression.nearestSafehouse(10)) return 'E: Save at safehouse';
+    if (Math.hypot(CC.config.gunShop.x - S.player.x, CC.config.gunShop.z - S.player.z) < 10) return 'E: Gun shop';
+    if (Math.hypot(CC.config.garage.x - S.player.x, CC.config.garage.z - S.player.z) < 10) return 'E: Garage';
+    if (CC.enemies && CC.enemies.nearest(S.player.x, S.player.z, 2.2)) return 'E: Melee';
+    return '';
   };
 })();
