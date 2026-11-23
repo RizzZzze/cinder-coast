@@ -34,7 +34,7 @@
       // so no shot shows a vast flat tan expanse. One merged mesh.
       (function () {
         var prng = CC.rng.make(seed + 700);
-        var tones = [0xB89A72, 0xD8B48E, 0xC49A6A, 0xD0A878, 0xC09A70];
+        var tones = [0xA8885E, 0xE8C89A, 0xB08050, 0xD8B48E, 0x8A6B4A];
         var ew = [-480, -320, -240, -160, -80, 0, 80, 160, 240, 320];
         var ns = [-320, -240, -160, -80, 0, 80, 160, 240, 320];
         var pparts = [];
