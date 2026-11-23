@@ -280,7 +280,7 @@
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-200, 8, 165], look: [-192, 1, 238] };
+        CC.camera3.shotCam = { pos: [-172, 6, 190], look: [-180, 1, 222] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }
