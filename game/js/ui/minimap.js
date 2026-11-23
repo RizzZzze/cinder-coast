@@ -31,6 +31,23 @@
       ctx.fillStyle = '#FFD166';
       ctx.beginPath(); ctx.arc(w.x, w.y, 6, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#1F3A5F'; ctx.lineWidth = 2; ctx.stroke();
+      if (S.activity) {
+        ctx.strokeStyle = '#2B7FFF'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(w.x, w.y, 10, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    if (S.heli) {
+      var hp = toMap(S.heli.mesh.position.x, S.heli.mesh.position.z);
+      ctx.fillStyle = '#E0433A';
+      ctx.beginPath(); ctx.arc(hp.x, hp.y, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#F4E6C8'; ctx.lineWidth = 2; ctx.stroke();
+    }
+    if (S.roadblock) {
+      S.roadblock.units.forEach(function (u) {
+        var rp = toMap(u.x, u.z);
+        ctx.fillStyle = '#E0433A';
+        ctx.beginPath(); ctx.arc(rp.x, rp.y, 4, 0, Math.PI * 2); ctx.fill();
+      });
     }
     if (S.police) {
       S.police.forEach(function (u) {
@@ -78,7 +95,14 @@
       ctx.font = 'bold 15px system-ui, sans-serif'; ctx.fillStyle = '#F4E6C8';
       CC.config.districts.forEach(function (d) {
         var p = toMap(d.x, d.z);
-        ctx.fillText(d.name, p.x - 40, p.y);
+        var unlocked = CC.progress ? CC.progress.districtUnlocked(d.name) : true;
+        if (unlocked) {
+          ctx.fillStyle = '#F4E6C8';
+          ctx.fillText(d.name, p.x - 40, p.y);
+        } else {
+          ctx.fillStyle = 'rgba(244,230,200,0.45)';
+          ctx.fillText(d.name + ' — LOCKED (Ch ' + d.unlockChapter + ')', p.x - 40, p.y);
+        }
       });
       ctx.fillStyle = '#FFD166';
       CC.config.landmarks.forEach(function (l) {
@@ -86,6 +110,33 @@
         ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#F4E6C8'; ctx.fillText(l.name, p.x + 8, p.y + 4); ctx.fillStyle = '#FFD166';
       });
+      // Gun shop and safehouses.
+      ctx.font = '13px system-ui, sans-serif';
+      var gs = toMap(CC.config.gunShop.at.x, CC.config.gunShop.at.z);
+      ctx.fillStyle = '#5E9A4A'; ctx.fillRect(gs.x - 4, gs.y - 4, 8, 8);
+      ctx.fillStyle = '#F4E6C8'; ctx.fillText('Gun Shop', gs.x + 8, gs.y + 4);
+      CC.config.safehouses.forEach(function (h) {
+        var sp = toMap(h.x, h.z);
+        ctx.fillStyle = '#7FC4E0'; ctx.fillRect(sp.x - 4, sp.y - 4, 8, 8);
+        ctx.fillStyle = '#F4E6C8'; ctx.fillText(h.name, sp.x + 8, sp.y + 4);
+      });
+      if (S && S.activity) {
+        var ap = toMap(S.waypoint.x, S.waypoint.z);
+        ctx.fillStyle = '#2B7FFF';
+        ctx.beginPath(); ctx.arc(ap.x, ap.y, 7, 0, Math.PI * 2); ctx.fill();
+      }
+      if (S && S.police) {
+        S.police.forEach(function (u) {
+          var pp = toMap(u.x, u.z);
+          ctx.fillStyle = (Math.floor(S.time * 3) % 2 === 0) ? '#E0433A' : '#FF6B5E';
+          ctx.beginPath(); ctx.arc(pp.x, pp.y, 4, 0, Math.PI * 2); ctx.fill();
+        });
+      }
+      if (S && S.heli) {
+        var hp2 = toMap(S.heli.mesh.position.x, S.heli.mesh.position.z);
+        ctx.fillStyle = '#E0433A';
+        ctx.beginPath(); ctx.arc(hp2.x, hp2.y, 6, 0, Math.PI * 2); ctx.fill();
+      }
       if (S && S.waypoint) {
         var w = toMap(S.waypoint.x, S.waypoint.z);
         ctx.strokeStyle = '#FFD166'; ctx.lineWidth = 2;

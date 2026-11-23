@@ -6,6 +6,7 @@
   var CC = window.CinderCoast;
   var chunks = [], budgetUsed = 0;
   CC.chunks = {
+    drawDist: 650,
     list: function () { return chunks; },
     register: function (scene) {
       chunks = [];
@@ -21,7 +22,7 @@
       budgetUsed = 0;
       chunks.forEach(function (c) {
         var d = Math.hypot(px - c.x, pz - c.z);
-        var want = d < 650;
+        var want = d < (CC.chunks.drawDist || 650);
         if (want !== c.visible && budgetUsed < 1) { c.visible = want; budgetUsed++; }
       });
       if (CC.city && CC.city.group) {
