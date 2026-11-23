@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/gta6-01/RizzZzze/cinder-coast/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![reward](https://make.fun/badge/gta6-01/RizzZzze/cinder-coast/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 
-Cinder Coast is an original open-world 3D crime game set in the coastal city of Port Calida — six districts, eight story missions, three activities, and a wanted system from one to five stars, built with Three.js.
+Cinder Coast is an open world crime game set in Port Calida, a sun-baked coastal city of six districts, where Ines Vela returns home to settle a debt across eight story chapters: steal, drive, and fight through police chases, convoy ambushes, tow calls, courier runs, and chop orders, while building cash, standing, weapons, and upgraded cars in a living city of traffic, pedestrians, and a five-star wanted system.
 
 ## Run it
 
