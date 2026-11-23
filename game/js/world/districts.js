@@ -5,19 +5,20 @@
 (function () {
   var CC = window.CinderCoast;
   function roofR(w, d) { return Math.sqrt(w * w + d * d) / 2; }
-  function building(parts, x, z, w, d, h, color, roofH, roofColor) {
-    parts.push({ shape: 'box', w: w, h: h, d: d, x: x, y: h / 2, z: z, color: color });
+  function building(parts, x, z, w, d, h, color, roofH, roofColor, base) {
+    var by = base || 0;
+    parts.push({ shape: 'box', w: w, h: h, d: d, x: x, y: by + h / 2, z: z, color: color });
     // Parapet cap, slightly wider than the walls, on top of the walls.
-    parts.push({ shape: 'box', w: w + 0.4, h: 0.5, d: d + 0.4, x: x, y: h + 0.25, z: z, color: 0xF4E6C8 });
+    parts.push({ shape: 'box', w: w + 0.4, h: 0.5, d: d + 0.4, x: x, y: by + h + 0.25, z: z, color: 0xF4E6C8 });
     if (roofH > 0) {
-      parts.push({ shape: 'cone', r: roofR(w, d), h: roofH, seg: 4, x: x, y: h + 0.5 + roofH / 2, z: z, ry: Math.PI / 4, color: roofColor || 0xC8643B });
-      parts.push({ shape: 'box', w: 0.9, h: 2.2, d: 0.9, x: x + w * 0.25, y: h + roofH * 0.6, z: z + d * 0.15, color: 0x8A5A40 });
+      parts.push({ shape: 'cone', r: roofR(w, d), h: roofH, seg: 4, x: x, y: by + h + 0.5 + roofH / 2, z: z, ry: Math.PI / 4, color: roofColor || 0xC8643B });
+      parts.push({ shape: 'box', w: 0.9, h: 2.2, d: 0.9, x: x + w * 0.25, y: by + h + roofH * 0.6, z: z + d * 0.15, color: 0x8A5A40 });
     }
     // Window grid on the front and back faces, storefront glass at street level.
     var rows = Math.max(1, Math.floor((h - 3) / 3.2));
     for (var r = 0; r < rows; r++) {
-      var wy = 2.6 + r * 3.2;
-      if (wy > h - 1) break;
+      var wy = by + 2.6 + r * 3.2;
+      if (wy > by + h - 1) break;
       var cols = Math.max(1, Math.floor((w - 4) / 3.4));
       for (var c = 0; c < cols; c++) {
         var wx = x - w / 2 + 2.4 + c * 3.4;
@@ -25,8 +26,8 @@
         parts.push({ shape: 'box', w: 1.3, h: 1.7, d: 0.12, x: wx, y: wy, z: z - d / 2 - 0.03, color: 0x2E4A5E });
       }
     }
-    parts.push({ shape: 'box', w: Math.min(w * 0.55, 7), h: 2.4, d: 0.12, x: x, y: 1.5, z: z + d / 2 + 0.03, color: 0x1E3A4A });
-    parts.push({ shape: 'box', w: Math.min(w * 0.6, 7), h: 0.18, d: 1.8, x: x, y: 3.1, z: z + d / 2 + 0.95, rx: -0.22, color: 0xF2A81D });
+    parts.push({ shape: 'box', w: Math.min(w * 0.55, 7), h: 2.4, d: 0.12, x: x, y: by + 1.5, z: z + d / 2 + 0.03, color: 0x1E3A4A });
+    parts.push({ shape: 'box', w: Math.min(w * 0.6, 7), h: 0.18, d: 1.8, x: x, y: by + 3.1, z: z + d / 2 + 0.95, rx: -0.22, color: 0xF2A81D });
     CC.spatial.addBox(x, z, w / 2, d / 2);
   }
   function stall(parts, x, z, color) {
@@ -49,6 +50,7 @@
       CC.districts.buildMercado(group, seed);
       CC.districts.buildLanternPark(group, seed);
       CC.districts.buildSunfield(group, seed);
+      CC.districts.buildHeights(group, seed);
     },
     buildMercado: function (group, seed) {
       var rng = CC.rng.make(seed + 700);
@@ -149,6 +151,74 @@
         parts.push({ shape: 'cone', r: 1.6, h: 1.6, x: 316, y: 5.9, z: px, color: 0x5E9A4A });
       }
       flush(parts, group);
+    },
+    buildHeights: function (group, seed) {
+      var rng = CC.rng.make(seed + 730);
+      var parts = [];
+      // Hillside terraces: two stepped plinths rising north, each grounded.
+      parts.push({ shape: 'box', w: 150, h: 3, d: 70, x: 120, y: 1.5, z: -430, color: 0x9C8F7A });
+      parts.push({ shape: 'box', w: 110, h: 3, d: 60, x: 120, y: 4.5, z: -490, color: 0xB9B1A3 });
+      CC.spatial.addBox(120, -430, 75, 35);
+      // Hillside villas on the terraces, stucco with terracotta roofs.
+      var villas = [
+        [80, -420, 16, 13, 9, 3], [160, -420, 15, 12, 8, 3], [120, -445, 18, 14, 10, 3],
+        [90, -480, 16, 13, 9, 6], [150, -480, 15, 12, 8, 6], [120, -505, 17, 13, 11, 6]
+      ];
+      villas.forEach(function (v, i) {
+        building(parts, v[0], v[1], v[2], v[3], v[4], i % 2 ? 0xF4E6C8 : 0xE9C98F, rng.range(2.5, 4), 0xC8643B, v[5]);
+      });
+      // Glass towers on the lower terrace.
+      building(parts, 70, -455, 16, 14, 26, 0x9FC4D8, 0, 0, 3);
+      building(parts, 170, -455, 16, 14, 22, 0x9FC4D8, 0, 0, 3);
+      flush(parts, group);
+      // Tessaly Funicular: twin rails climbing the hill from the bridge end
+      // (120, -380) to the top platform (120, -520), cable car included.
+      var railMat = new THREE.MeshLambertMaterial({ color: 0x2B2B33 });
+      [-1.2, 1.2].forEach(function (off) {
+        var rail = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 145), railMat);
+        rail.position.set(120 + off, 3.2, -450);
+        rail.rotation.x = -0.042;
+        group.add(rail);
+      });
+      for (var s = -390; s >= -510; s -= 12) {
+        var sleeper = new THREE.Mesh(new THREE.BoxGeometry(4, 0.2, 1.2),
+          new THREE.MeshLambertMaterial({ color: 0x8A6B4A }));
+        sleeper.position.set(120, 0.4 + (-s - 380) * 0.043, s);
+        group.add(sleeper);
+      }
+      // Top platform: deck on posts, roof on posts, steps down to the rails.
+      var plat = new THREE.Group();
+      var deck = new THREE.Mesh(new THREE.BoxGeometry(16, 1, 12),
+        new THREE.MeshLambertMaterial({ color: 0xB9B1A3 }));
+      deck.position.y = 6.5; plat.add(deck);
+      var proof = new THREE.Mesh(new THREE.BoxGeometry(16, 0.5, 12),
+        new THREE.MeshLambertMaterial({ color: 0xC8643B }));
+      proof.position.y = 10.5; plat.add(proof);
+      [[-7, -5], [7, -5], [-7, 5], [7, 5]].forEach(function (pc) {
+        var post = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4, 0.6),
+          new THREE.MeshLambertMaterial({ color: 0xF4E6C8 }));
+        post.position.set(pc[0], 8.5, pc[1]); plat.add(post);
+      });
+      plat.position.set(120, 0, -520);
+      group.add(plat);
+      CC.spatial.addBox(120, -520, 8, 6);
+      var cabin = CC.geo.meshFromParts([
+        { shape: 'box', w: 3, h: 2.6, d: 4, x: 0, y: 1.3, z: 0, color: 0xF2A81D },
+        { shape: 'box', w: 3.1, h: 1, d: 4.1, x: 0, y: 2.1, z: 0, color: 0x9FC4D8 },
+        { shape: 'box', w: 3.2, h: 0.3, d: 4.2, x: 0, y: 2.75, z: 0, color: 0xC8643B }
+      ]);
+      cabin.position.set(120, 0.8, -390);
+      group.add(cabin);
+      CC.districts.funicular = { mesh: cabin, t: 0, dir: 1 };
+    },
+    update: function (dt) {
+      var f = CC.districts.funicular;
+      if (!f) return;
+      f.t += f.dir * dt * 0.03;
+      if (f.t >= 1) { f.t = 1; f.dir = -1; }
+      if (f.t <= 0) { f.t = 0; f.dir = 1; }
+      var z = -390 - f.t * 130;
+      f.mesh.position.set(120, 0.8 + f.t * 6, z);
     }
   };
 })();
