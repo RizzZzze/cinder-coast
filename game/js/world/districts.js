@@ -161,14 +161,14 @@
         ROOFS[(i + 1) % ROOFS.length], { shop: true, roof: i % 3 === 0 ? 'flat' : (i % 3 === 1 ? 'stepped' : 'pyramid'), bothSides: true, balcony: true, awning: 0x2BB3B0, name: names[i] });
     }
     parts.push({ shape: 'box', w: 22, h: 42, d: 18, x: 240, y: 21, z: 80, color: GLASS });
-    // BRIEF-07 round 7: the camera sits at z -50, SOUTH of the tower —
-    // the near side of the cylinder is z 92 - sqrt(...), not 92 + sqrt.
-    // Round 5 put the grid on the far side, hidden behind the cylinder.
+    // BRIEF-07 round 8: the tower box spans z 71..89 and the camera sits
+    // at z -50, so the face toward the camera is the box face at z 71 —
+    // the cylinder (z 83..101) is embedded BEHIND it, and every earlier
+    // grid (z 89, z 92+sqrt, z 92-sqrt) sat inside or behind the box.
+    // The grid goes flat on the camera-facing face, z 70.94.
     for (var wy2 = 0; wy2 < 8; wy2++) {
       for (var wx2 = 0; wx2 < 4; wx2++) {
-        var wdx = 233.5 + wx2 * 4.3 - 240;
-        var wtz = 92 - Math.sqrt(81 - wdx * wdx) - 0.08;
-        parts.push({ shape: 'box', w: 1.6, h: 1.6, d: 0.12, x: 233.5 + wx2 * 4.3, y: 9 + wy2 * 3.6, z: wtz, color: 0x1F3A5F });
+        parts.push({ shape: 'box', w: 1.6, h: 1.6, d: 0.12, x: 233.5 + wx2 * 4.3, y: 9 + wy2 * 3.6, z: 70.94, color: 0x1F3A5F });
       }
     }
     parts.push({ shape: 'cyl', rTop: 9, rBot: 9, h: 42, seg: 10, x: 240, y: 21, z: 92, color: 0xBFE0EA });
