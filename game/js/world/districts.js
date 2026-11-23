@@ -31,24 +31,45 @@
       var rh = opts.roofH || rng.range(2, 5);
       parts.push({ shape: 'cone', r: w * 0.7071, h: rh, seg: 4, x: x, y: h + rh / 2, z: z, ry: Math.PI / 4, color: roof });
     }
+    // BRIEF-07: windows read as dark glass with a dark frame, never as
+    // pale squares that wash out in golden-hour light. A vertical accent
+    // strip, a dark cornice and a dark plinth break every large wall into
+    // bands, so no facade is one flat blank colour.
+    var DARKGLASS = 0x1F3A5F, FRAME = 0x2B2B33, PLINTH = 0x5A4632;
+    var ACCENTS = [0xC8643B, 0x2BB3B0, 0xE0433A, 0x5E9A4A];
+    var accent = ACCENTS[Math.floor(rng.range(0, ACCENTS.length))];
+    if (accent === wall) accent = 0x2BB3B0;
+    var accentW = 2.0, accentX = x - w / 2 + accentW / 2 + 0.15;
+    parts.push({ shape: 'box', w: accentW, h: h - 0.6, d: 0.14, x: accentX, y: (h - 0.6) / 2 + 0.3, z: z + d / 2 + 0.07, color: accent });
+    parts.push({ shape: 'box', w: w + 0.4, h: 0.5, d: d + 0.4, x: x, y: h - 0.25, z: z, color: FRAME });
+    parts.push({ shape: 'box', w: w + 0.14, h: 1.1, d: d + 0.14, x: x, y: 0.55, z: z, color: PLINTH });
     // Window pattern varies building to building: size, spacing, gaps.
-    var winW = rng.pick([0.9, 1.2, 1.8]);
-    var winH = rng.pick([1.0, 1.4, 2.0]);
+    var winW = rng.pick([1.2, 1.6, 2.1]);
+    var winH = rng.pick([1.4, 1.8, 2.4]);
     var rows = Math.max(1, Math.floor((h - 3) / 3.2));
     var cols = Math.max(2, Math.floor(w / (winW + 1.6)));
-    var lit = rng.chance(0.4) ? 0xFFD166 : GLASS;
+    var lit = rng.chance(0.4) ? 0xFFD166 : DARKGLASS;
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
         if (rng.chance(0.12)) continue;
         var wx = x - w / 2 + (c + 0.5) * (w / cols);
         var wy = 3.4 + r * 3.2;
-        if (wy > h - 1) continue;
-        var wc = rng.chance(0.3) ? 0xFFD166 : GLASS;
-        parts.push({ shape: 'box', w: winW, h: winH, d: 0.12, x: wx, y: wy, z: z + d / 2 + 0.04, color: wc });
-        if (opts.bothSides) parts.push({ shape: 'box', w: winW, h: winH, d: 0.12, x: wx, y: wy, z: z - d / 2 - 0.04, color: wc });
+        if (wy + winH / 2 > h - 0.7) continue;
+        var wc = rng.chance(0.3) ? 0xFFD166 : DARKGLASS;
+        // Front and back faces: skip the column the accent strip covers.
+        if (Math.abs(wx - accentX) > accentW / 2 + winW / 2 + 0.15) {
+          parts.push({ shape: 'box', w: winW + 0.3, h: winH + 0.3, d: 0.1, x: wx, y: wy, z: z + d / 2 + 0.02, color: FRAME });
+          parts.push({ shape: 'box', w: winW, h: winH, d: 0.12, x: wx, y: wy, z: z + d / 2 + 0.04, color: wc });
+          if (opts.bothSides) {
+            parts.push({ shape: 'box', w: winW + 0.3, h: winH + 0.3, d: 0.1, x: wx, y: wy, z: z - d / 2 - 0.02, color: FRAME });
+            parts.push({ shape: 'box', w: winW, h: winH, d: 0.12, x: wx, y: wy, z: z - d / 2 - 0.04, color: wc });
+          }
+        }
         // Side faces get windows too, so a building seen side-on is never a blank wall.
         var wz = z - d / 2 + (c + 0.5) * (d / cols);
+        parts.push({ shape: 'box', w: 0.1, h: winH + 0.3, d: winW + 0.3, x: x - w / 2 - 0.02, y: wy, z: wz, color: FRAME });
         parts.push({ shape: 'box', w: 0.12, h: winH, d: winW, x: x - w / 2 - 0.04, y: wy, z: wz, color: wc });
+        parts.push({ shape: 'box', w: 0.1, h: winH + 0.3, d: winW + 0.3, x: x + w / 2 + 0.02, y: wy, z: wz, color: FRAME });
         parts.push({ shape: 'box', w: 0.12, h: winH, d: winW, x: x + w / 2 + 0.04, y: wy, z: wz, color: wc });
       }
     }

@@ -174,8 +174,37 @@
     if (v && CC.fx) CC.fx.headlightGlow(v);
     return v;
   }
-  // A standing crowd: pedestrians placed tight around a point, held still
-  // by a long look timer so they read as a crowd in the still.
+  // A striped road barrier, built once per call from merged parts.
+  function barrier(S, x, z, ry) {
+    var m = CC.geo.meshFromParts([
+      { shape: 'box', w: 2.6, h: 0.22, d: 0.5, x: 0, y: 0.11, z: 0, color: 0x2B2B33 },
+      { shape: 'box', w: 2.6, h: 0.5, d: 0.16, x: 0, y: 0.85, z: 0, color: 0xF2A81D },
+      { shape: 'box', w: 0.9, h: 0.52, d: 0.18, x: -0.65, y: 0.85, z: 0, color: 0xF4E6C8 },
+      { shape: 'box', w: 0.9, h: 0.52, d: 0.18, x: 0.65, y: 0.85, z: 0, color: 0xF4E6C8 },
+      { shape: 'box', w: 0.16, h: 0.7, d: 0.16, x: -1.1, y: 0.45, z: 0, color: 0x2B2B33 },
+      { shape: 'box', w: 0.16, h: 0.7, d: 0.16, x: 1.1, y: 0.45, z: 0, color: 0x2B2B33 }
+    ]);
+    m.position.set(x, 0, z);
+    m.rotation.y = ry || 0;
+    S.scene.add(m);
+    return m;
+  }
+  // A static muzzle-flash glow sprite: the pooled flash lives 0.07 s, so
+  // a timed screenshot almost never catches it. This one is permanent.
+  function flashSprite(S, x, y, z, scale) {
+    var cv = document.createElement('canvas'); cv.width = 64; cv.height = 64;
+    var cx = cv.getContext('2d');
+    var g = cx.createRadialGradient(32, 32, 2, 32, 32, 30);
+    g.addColorStop(0, 'rgba(255,240,200,1)');
+    g.addColorStop(0.4, 'rgba(255,180,80,0.85)');
+    g.addColorStop(1, 'rgba(255,120,40,0)');
+    cx.fillStyle = g; cx.fillRect(0, 0, 64, 64);
+    var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, opacity: 0.95, depthWrite: false }));
+    sp.position.set(x, y, z);
+    sp.scale.set(scale, scale, 1);
+    S.scene.add(sp);
+    return sp;
+  }
   function crowd(S, cx, cz, n, rng) {
     var shirts = [0xC8643B, 0x2BB3B0, 0xF2A81D, 0x5E9A4A, 0xE0433A, 0x7FA8C9, 0xF4E6C8];
     var skins = [0xE8B88A, 0xC98A5A, 0x8A5A3A, 0xF0C8A0];
@@ -201,9 +230,9 @@
         var car = placePlayerCar(S, 'spindle', 246, -20, Math.PI, 0x2BB3B0);
         car.speed = 24;
         CC.wanted.setHeat(100);
-        // Three cruisers in an echelon flanking the hero car, none hidden
-        // directly behind it from the chase camera.
-        [[258, -18], [252, -12], [234, -18]].forEach(function (cp) {
+        // BRIEF-07: three cruisers in a true echelon behind the hero car,
+        // spread laterally so none hides on the camera-hero axis.
+        [[232, -12], [240, -4], [258, -10]].forEach(function (cp) {
           var u = CC.police.spawnUnit('cruiser');
           if (!u) return;
           u.x = cp[0]; u.z = cp[1]; u.heading = Math.PI;
@@ -211,6 +240,22 @@
           u.mesh.rotation.y = Math.PI;
           u.speed = 18;
         });
+        // BRIEF-07: a permanent muzzle flash, tracer and spark burst at
+        // the lead cruiser (232, -12), so the gunfire reads in the still
+        // instead of depending on a 0.07 s pooled flash.
+        flashSprite(S, 232, 1.4, -14.4, 2.6);
+        var trace = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 15.1),
+          new THREE.MeshBasicMaterial({ color: 0xFFF2B0 }));
+        trace.position.set(239, 1.3, -17.2);
+        S.scene.add(trace);
+        trace.lookAt(246, 1.2, -20);
+        S.scene.add(CC.geo.meshFromParts([
+          { shape: 'box', w: 0.3, h: 0.3, d: 0.3, x: 244, y: 0.8, z: -17, color: 0xFFD166 },
+          { shape: 'box', w: 0.24, h: 0.24, d: 0.24, x: 243.4, y: 1.1, z: -16.6, color: 0xFF8800 },
+          { shape: 'box', w: 0.24, h: 0.24, d: 0.24, x: 244.6, y: 0.5, z: -17.4, color: 0xFFD166 },
+          { shape: 'box', w: 0.2, h: 0.2, d: 0.2, x: 243.8, y: 1.4, z: -17.2, color: 0xFFF2B0 },
+          { shape: 'box', w: 0.2, h: 0.2, d: 0.2, x: 244.4, y: 0.4, z: -16.4, color: 0xFF8800 }
+        ]));
         heliOver(S, 252, 18, 55);
         staticCar(S, 'taxi', 236.5, -58, Math.PI, 0xF2A81D);
         staticCar(S, 'taxi', 236, 20, 0, 0xF2A81D);
@@ -257,7 +302,12 @@
         S.objectiveDist = 20;
         S.missionProgress = 0.45;
         if (CC.notify) CC.notify.push('Game saved');
-        CC.camera3.shotCam = { pos: [-8, 9, -360], look: [0, 2, -400] };
+        // BRIEF-07: camera back and up so the tow vehicle is fully in
+        // frame, not cut off at the bottom edge; deck barriers anchor the
+        // foreground corners.
+        barrier(S, -11, -362, 0.2);
+        barrier(S, 11, -364, -0.2);
+        CC.camera3.shotCam = { pos: [-9, 10, -356], look: [0, 2, -400] };
       } else if (name === 'police') {
         document.body.classList.add('shot-police');
         S.player.x = -196; S.player.z = 228; S.player.heading = 0;
@@ -266,20 +316,50 @@
         CC.wanted.setHeat(180);
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
-        staticCar(S, 'swat', -200, 204, Math.PI / 2);
-        // A SWAT sign on the van's camera-facing side, so the van reads
-        // unmistakably and is never mistaken for a civilian truck.
-        var swatSign = CC.geo.textSign('SWAT', 4, 0.8);
-        swatSign.position.set(-200, 1.5, 202.7);
+        // BRIEF-07: the SWAT van stands in the true foreground, large and
+        // broadside, 12 m from the camera, with a big legible SWAT sign on
+        // its camera side, clear of the pause menu and the cruiser line.
+        staticCar(S, 'swat', -201, 207, Math.PI / 2);
+        var swatSign = CC.geo.textSign('SWAT', 5.5, 1.3);
+        swatSign.position.set(-201, 1.6, 205.55);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
+        // Foreground ground detail between the camera and the van, so the
+        // bottom half of the frame is not an empty expanse: a parked car
+        // at the left edge, striped barriers, planters, debris, and an
+        // officer standing beside the van.
+        staticCar(S, 'cutter', -218, 201, Math.PI / 2, 0xE0433A);
+        barrier(S, -216, 206, 0.5);
+        barrier(S, -196, 201, -0.4);
+        var planterA = CC.geo.meshFromParts([
+          { shape: 'box', w: 1.6, h: 0.7, d: 1.6, x: 0, y: 0.35, z: 0, color: 0x8A6B4A },
+          { shape: 'box', w: 1.4, h: 0.5, d: 1.4, x: 0, y: 0.9, z: 0, color: 0x5E9A4A }
+        ]);
+        planterA.position.set(-214, 0, 210);
+        S.scene.add(planterA);
+        var planterB = CC.geo.meshFromParts([
+          { shape: 'box', w: 1.6, h: 0.7, d: 1.6, x: 0, y: 0.35, z: 0, color: 0x8A6B4A },
+          { shape: 'box', w: 1.4, h: 0.5, d: 1.4, x: 0, y: 0.9, z: 0, color: 0x5E9A4A }
+        ]);
+        planterB.position.set(-197, 0, 199);
+        S.scene.add(planterB);
+        S.scene.add(CC.geo.meshFromParts([
+          { shape: 'box', w: 0.7, h: 0.4, d: 0.5, x: -210, y: 0.2, z: 203, color: 0x2B2B33 },
+          { shape: 'box', w: 0.5, h: 0.3, d: 0.4, x: -204, y: 0.15, z: 205, color: 0x8A6B4A },
+          { shape: 'box', w: 0.9, h: 0.3, d: 0.6, x: -212, y: 0.15, z: 208, color: 0x2B2B33 },
+          { shape: 'box', w: 0.4, h: 0.25, d: 0.4, x: -199, y: 0.12, z: 204, color: 0x8A6B4A }
+        ]));
+        var vanOfficer = CC.geo.personMesh(0x1F3A5F, 0xE8B88A);
+        vanOfficer.position.set(-196, 0, 210);
+        vanOfficer.rotation.y = -2.2;
+        S.scene.add(vanOfficer);
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -188; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-188, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-230, 6, 190], look: [-200, 1, 222] };
+        CC.camera3.shotCam = { pos: [-209, 3.2, 198], look: [-186, 2, 222] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }

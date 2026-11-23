@@ -53,6 +53,18 @@
         [[-150, 92, 46, 30], [-120, 108, 30, 18], [-210, 244, 44, 28], [-180, 210, 26, 16], [-20, -360, 14, 44], [20, -360, 14, 44], [-45, -350, 24, 30], [45, -350, 24, 30]].forEach(function (pl) {
           pparts.push({ shape: 'box', w: pl[2], h: 0.04, d: pl[3], x: pl[0], y: 0.02, z: pl[1], color: tones[Math.floor(prng.range(0, tones.length))] });
         });
+        // BRIEF-07: checker paving in the two closest foregrounds (the
+        // police block and the foot plaza) — small slabs in strongly
+        // contrasting tones, so the ground reads as paving, not one
+        // flat tan sheet.
+        var checkerTones = [0x6B4A2F, 0xE8D8B8, 0xA8885E, 0xD8B48E, 0x8A6B4A];
+        [[-208, 212, 9, 7], [-148, 96, 10, 6]].forEach(function (ck) {
+          for (var gy = 0; gy < ck[3]; gy++) {
+            for (var gx = 0; gx < ck[2]; gx++) {
+              pparts.push({ shape: 'box', w: 3.8, h: 0.05, d: 3.8, x: ck[0] - (ck[2] - 1) * 2 + gx * 4, y: 0.025, z: ck[1] - (ck[3] - 1) * 2 + gy * 4, color: checkerTones[(gx + gy) % checkerTones.length] });
+            }
+          }
+        });
         // Crosswalks at every central junction: white stripes across both
         // roads, one merged mesh, so every junction reads as a street.
         var crng = CC.rng.make(seed + 701);
