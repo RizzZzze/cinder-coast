@@ -47,6 +47,7 @@
     funicular: null,
     build: function (group, seed) {
       CC.districts.buildMercado(group, seed);
+      CC.districts.buildLanternPark(group, seed);
     },
     buildMercado: function (group, seed) {
       var rng = CC.rng.make(seed + 700);
@@ -77,6 +78,41 @@
       var cols = [0xC8643B, 0xF2A81D, 0x2BB3B0, 0xE0433A];
       for (var s = 0; s < 10; s++) {
         stall(parts, -188 + s * 7, -48 + (s % 2) * 14, cols[s % 4]);
+      }
+      flush(parts, group);
+    },
+    buildLanternPark: function (group, seed) {
+      var rng = CC.rng.make(seed + 710);
+      var parts = [];
+      // Central plaza paving, a flat disc grounded on the street.
+      parts.push({ shape: 'cyl', rTop: 42, rBot: 42, h: 0.3, seg: 24, x: 0, y: 0.15, z: -160, color: 0xE8D9B0 });
+      // Fountain at the plaza centre: basin, water, central column, top bowl.
+      parts.push({ shape: 'cyl', rTop: 8, rBot: 8.5, h: 1.2, seg: 16, x: 0, y: 0.6, z: -160, color: 0xF4E6C8 });
+      parts.push({ shape: 'cyl', rTop: 7.4, rBot: 7.4, h: 0.2, seg: 16, x: 0, y: 1.2, z: -160, color: 0x2BB3B0 });
+      parts.push({ shape: 'cyl', rTop: 0.8, rBot: 1.1, h: 4.5, seg: 10, x: 0, y: 3.4, z: -160, color: 0xF4E6C8 });
+      parts.push({ shape: 'sphere', r: 1.6, x: 0, y: 6.2, z: -160, color: 0xFFD166 });
+      CC.spatial.addBox(0, -160, 8.5, 8.5);
+      // Palm avenues along the plaza's north and south edges.
+      for (var px = -56; px <= 56; px += 16) {
+        [-118, -202].forEach(function (pz) {
+          parts.push({ shape: 'cyl', rTop: 0.12, rBot: 0.2, h: 5.5, x: px, y: 2.75, z: pz, color: 0x8A6B4A });
+          parts.push({ shape: 'cone', r: 1.6, h: 1.6, x: px, y: 5.9, z: pz, color: 0x5E9A4A });
+          parts.push({ shape: 'cone', r: 1.2, h: 1.2, x: px, y: 6.6, z: pz, color: 0x6FAE56 });
+        });
+      }
+      // Civic ring: six stucco civic buildings around the plaza.
+      var ring = [[-64, -160], [64, -160], [-48, -208], [48, -208], [-48, -112], [48, -112]];
+      ring.forEach(function (p, i) {
+        building(parts, p[0], p[1], 18, 14, 12 + (i % 3) * 4, 0xF4E6C8, rng.range(2.5, 4), 0xFFD166);
+      });
+      // Halo Tower observation deck: a disc platform and glass ring at y 120,
+      // sitting on the tower shaft that already rises from the ground.
+      parts.push({ shape: 'cyl', rTop: 12, rBot: 12, h: 1, seg: 20, x: 0, y: 120.5, z: -200, color: 0xF4E6C8 });
+      parts.push({ shape: 'cyl', rTop: 11, rBot: 11, h: 2.4, seg: 20, x: 0, y: 122.2, z: -200, color: 0x9FC4D8 });
+      // Benches around the plaza, all grounded.
+      for (var b = 0; b < 8; b++) {
+        var a = b * Math.PI / 4;
+        parts.push({ shape: 'box', w: 3, h: 0.5, d: 1, x: Math.cos(a) * 26, y: 0.5, z: -160 + Math.sin(a) * 26, color: 0x8A6B4A });
       }
       flush(parts, group);
     }
