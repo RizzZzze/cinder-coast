@@ -330,20 +330,20 @@
         // BRIEF-07: the SWAT van stands in the true foreground, large and
         // broadside, 12 m from the camera, with a big legible SWAT sign on
         // its camera side, clear of the pause menu and the cruiser line.
-        staticCar(S, 'swat', -201, 207, Math.PI / 2);
-        // BRIEF-07 round 2: the sign sits on the cargo box only (3.4 m),
+        staticCar(S, 'swat', -202.5, 207, Math.PI / 2);
+        // BRIEF-07 round 5: the sign sits on the cargo box only (3.4 m),
         // so the blue cab stays visible at the east end instead of the
         // sign reading as a billboard across the whole van.
         var swatSign = CC.geo.textSign('SWAT', 3.4, 1.0);
-        swatSign.position.set(-202.1, 1.35, 205.55);
+        swatSign.position.set(-203.6, 1.35, 205.55);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
         // Foreground ground detail between the camera and the van, so the
-        // bottom half of the frame is not an empty expanse: a parked car
-        // at the left edge, striped barriers, planters, debris, and an
-        // officer standing beside the van. Positions are inside the new
-        // camera frustum (look -182, 222), not off its west edge.
-        staticCar(S, 'cutter', -207, 204, Math.PI / 2, 0xE0433A);
+        // bottom half of the frame is not an empty expanse: striped
+        // barriers, planters, debris, and an officer standing beside the
+        // van. The parked car sits by the roadblock, clear of the van —
+        // at 6 m from the camera it filled the whole foreground.
+        staticCar(S, 'cutter', -190, 216, Math.PI / 2, 0xE0433A);
         barrier(S, -208, 208, 0.5);
         barrier(S, -196, 201, -0.4);
         var planterA = CC.geo.meshFromParts([
@@ -365,7 +365,7 @@
           { shape: 'box', w: 0.4, h: 0.25, d: 0.4, x: -199, y: 0.12, z: 204, color: 0x8A6B4A }
         ]));
         var vanOfficer = CC.geo.personMesh(0x1F3A5F, 0xE8B88A);
-        vanOfficer.position.set(-196, 0, 210);
+        vanOfficer.position.set(-198, 0, 212);
         vanOfficer.rotation.y = -2.2;
         S.scene.add(vanOfficer);
         var flank = CC.police.spawnUnit('cruiser');
