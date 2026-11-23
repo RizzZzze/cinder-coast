@@ -56,12 +56,13 @@
         // BRIEF-07: checker paving in the two closest foregrounds (the
         // police block and the foot plaza) — small slabs in strongly
         // contrasting tones, so the ground reads as paving, not one
-        // flat tan sheet.
+        // flat tan sheet. The foot plaza uses a finer pitch, since its
+        // camera sits closer to the ground.
         var checkerTones = [0x6B4A2F, 0xE8D8B8, 0xA8885E, 0xD8B48E, 0x8A6B4A];
-        [[-208, 212, 9, 7], [-148, 96, 10, 6]].forEach(function (ck) {
+        [[-208, 212, 9, 7, 4, 3.8], [-148, 96, 16, 10, 2.5, 2.3]].forEach(function (ck) {
           for (var gy = 0; gy < ck[3]; gy++) {
             for (var gx = 0; gx < ck[2]; gx++) {
-              pparts.push({ shape: 'box', w: 3.8, h: 0.05, d: 3.8, x: ck[0] - (ck[2] - 1) * 2 + gx * 4, y: 0.025, z: ck[1] - (ck[3] - 1) * 2 + gy * 4, color: checkerTones[(gx + gy) % checkerTones.length] });
+              pparts.push({ shape: 'box', w: ck[5], h: 0.05, d: ck[5], x: ck[0] - (ck[2] - 1) * ck[4] / 2 + gx * ck[4], y: 0.025, z: ck[1] - (ck[3] - 1) * ck[4] / 2 + gy * ck[4], color: checkerTones[(gx + gy) % checkerTones.length] });
             }
           }
         });

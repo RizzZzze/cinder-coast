@@ -303,11 +303,21 @@
         S.objectiveDist = 20;
         S.missionProgress = 0.45;
         if (CC.notify) CC.notify.push('Game saved');
-        // BRIEF-07: camera back and up so the tow vehicle is fully in
-        // frame, not cut off at the bottom edge; deck barriers anchor the
-        // foreground corners.
-        barrier(S, -11, -362, 0.2);
-        barrier(S, 11, -364, -0.2);
+        // BRIEF-07 round 4: clear civilian traffic from the deck corridor
+        // between the camera and the lorry, so no car sits sliced across
+        // the bottom edge in front of the tow; freeze the traffic cap so
+        // none respawns into the corridor during the shot. Deck barriers
+        // sit further north, inside the frame.
+        for (var ti = CC.traffic.cars.length - 1; ti >= 0; ti--) {
+          var tc = CC.traffic.cars[ti];
+          if (Math.abs(tc.x) < 14 && tc.z > -400) {
+            tc.mesh.parent.remove(tc.mesh);
+            CC.traffic.cars.splice(ti, 1);
+          }
+        }
+        CC.config.caps.traffic = CC.traffic.cars.length;
+        barrier(S, -11, -372, 0.2);
+        barrier(S, 11, -374, -0.2);
         CC.camera3.shotCam = { pos: [-9, 10, -356], look: [0, 2, -400] };
       } else if (name === 'police') {
         document.body.classList.add('shot-police');
