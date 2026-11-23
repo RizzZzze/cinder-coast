@@ -48,6 +48,7 @@
     build: function (group, seed) {
       CC.districts.buildMercado(group, seed);
       CC.districts.buildLanternPark(group, seed);
+      CC.districts.buildSunfield(group, seed);
     },
     buildMercado: function (group, seed) {
       var rng = CC.rng.make(seed + 700);
@@ -113,6 +114,39 @@
       for (var b = 0; b < 8; b++) {
         var a = b * Math.PI / 4;
         parts.push({ shape: 'box', w: 3, h: 0.5, d: 1, x: Math.cos(a) * 26, y: 0.5, z: -160 + Math.sin(a) * 26, color: 0x8A6B4A });
+      }
+      flush(parts, group);
+    },
+    buildSunfield: function (group, seed) {
+      var rng = CC.rng.make(seed + 720);
+      var parts = [];
+      // Beachfront boulevard hotels: tall stucco and glass towers with
+      // varied rooflines — flat parapets, pyramid caps, one stepped crown.
+      var hotels = [
+        [268, -120, 20, 18, 30, 0xF4E6C8, 4], [268, -80, 18, 16, 22, 0x9FC4D8, 0],
+        [268, -40, 22, 18, 34, 0xF4E6C8, 5], [268, 0, 18, 16, 26, 0xE9C98F, 3],
+        [268, 40, 20, 18, 20, 0x9FC4D8, 0], [268, 80, 18, 16, 28, 0xF4E6C8, 4]
+      ];
+      hotels.forEach(function (h) {
+        building(parts, h[0], h[1], h[2], h[3], h[4], h[5], h[6]);
+        // Glass front facing the boulevard (west face).
+        parts.push({ shape: 'box', w: 0.12, h: h[4] - 4, d: h[3] * 0.7, x: h[0] - h[2] / 2 - 0.03, y: h[4] / 2 + 1, z: h[1], color: 0x9FC4D8 });
+      });
+      // Cafes along the boulevard with striped awnings and balconies.
+      var cafes = [[296, -100], [296, -60], [296, -20], [296, 20], [296, 60]];
+      cafes.forEach(function (c, i) {
+        building(parts, c[0], c[1], 12, 10, 7, i % 2 ? 0xF4E6C8 : 0xE9C98F, 2.5);
+        parts.push({ shape: 'box', w: 10, h: 0.4, d: 2.2, x: c[0], y: 4.6, z: c[1] + 5.5, color: 0xF4E6C8 });
+      });
+      // Boardwalk: timber planks along the beach edge, grounded at y 0.15.
+      parts.push({ shape: 'box', w: 8, h: 0.3, d: 320, x: 332, y: 0.15, z: 0, color: 0xC9A37A });
+      for (var pz = -150; pz <= 150; pz += 12) {
+        parts.push({ shape: 'box', w: 8, h: 0.05, d: 0.3, x: 332, y: 0.32, z: pz, color: 0x8A6B4A });
+      }
+      // Palm row between boulevard and boardwalk.
+      for (var px = -140; px <= 100; px += 20) {
+        parts.push({ shape: 'cyl', rTop: 0.12, rBot: 0.2, h: 5.5, x: 316, y: 2.75, z: px, color: 0x8A6B4A });
+        parts.push({ shape: 'cone', r: 1.6, h: 1.6, x: 316, y: 5.9, z: px, color: 0x5E9A4A });
       }
       flush(parts, group);
     }
