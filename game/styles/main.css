@@ -1,0 +1,52 @@
+/* Cinder Coast styles: page layout, HUD and menu panels. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #12303F; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+#game, #game canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#damage-flash { position: absolute; inset: 0; background: #E0433A; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 5; }
+#hud { position: absolute; inset: 0; pointer-events: none; z-index: 10; color: #F4E6C8; text-shadow: 0 1px 3px rgba(0,0,0,0.7); }
+#top-left { position: absolute; top: 12px; left: 14px; }
+#clock { font-size: 20px; font-weight: 700; }
+#stars { font-size: 26px; letter-spacing: 2px; }
+#stars .star { color: rgba(244,230,200,0.35); }
+#stars .star.lit { color: #FFD166; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0.55; } }
+#objective-line { font-size: 15px; font-weight: 600; margin-top: 4px; max-width: 520px; }
+#objective-dist { color: #FFD166; }
+#progress-wrap { width: 260px; height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; margin-top: 6px; display: none; }
+#progress-fill { height: 100%; width: 0; background: #FFD166; border-radius: 4px; }
+#top-right { position: absolute; top: 12px; right: 16px; text-align: right; font-size: 18px; font-weight: 700; }
+#standing { font-size: 14px; font-weight: 600; }
+#feed { position: absolute; top: 110px; right: 16px; width: 300px; text-align: right; }
+.feed-item { background: rgba(31,58,95,0.85); border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; font-size: 14px; }
+#bottom-left { position: absolute; left: 14px; bottom: 14px; }
+#minimap { border-radius: 50%; border: 3px solid #F4E6C8; background: #0E2A3A; display: block; }
+#bars { margin-top: 8px; width: 180px; }
+.bar { height: 12px; background: rgba(0,0,0,0.55); border-radius: 6px; overflow: hidden; margin-bottom: 4px; }
+.bar > div { height: 100%; }
+#health-fill { width: 100%; background: #5E9A4A; }
+#armour-fill { width: 25%; background: #7FC4E0; }
+#health-label { font-size: 11px; opacity: 0.9; }
+#bottom-right { position: absolute; right: 16px; bottom: 14px; text-align: right; font-size: 18px; font-weight: 700; }
+#ammo { font-size: 15px; }
+#speedometer { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); text-align: center; font-size: 26px; font-weight: 800; background: rgba(31,58,95,0.75); border-radius: 10px; padding: 4px 16px; display: none; }
+#speedometer .bar { width: 140px; margin: 4px auto 0; }
+#damage-bar { background: #E0433A; width: 100%; }
+#gear { font-size: 14px; }
+#prompt { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); background: rgba(31,58,95,0.9); border-radius: 8px; padding: 8px 14px; font-size: 16px; font-weight: 700; display: none; }
+#crosshair { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 28px; display: none; }
+#hitmarker { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 24px; color: #E0433A; opacity: 0; }
+.panel-screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(10,25,35,0.28); z-index: 20; }
+.panel { background: rgba(244,230,200,0.96); color: #1F3A5F; border-radius: 16px; padding: 18px 24px; width: 430px; max-width: 92vw; max-height: 88vh; overflow: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.45); }
+.panel.wide { width: 920px; }
+.panel h1 { margin: 0 0 4px; font-size: 36px; letter-spacing: 2px; color: #C8643B; }
+.panel h2 { margin: 0 0 12px; font-size: 28px; }
+.panel .subtitle { margin: 0 0 12px; font-weight: 700; }
+.panel .story { font-size: 15px; line-height: 1.5; }
+.panel button { display: block; width: 100%; margin: 6px 0; padding: 10px; font-size: 16px; font-weight: 700; color: #F4E6C8; background: #1F3A5F; border: none; border-radius: 10px; cursor: pointer; }
+.panel button:hover { background: #C8643B; }
+.panel button:disabled { opacity: 0.45; cursor: default; }
+.panel label { display: block; margin: 10px 0; font-weight: 600; }
+.panel input[type="range"] { width: 100%; }
+.panel .hint { font-size: 13px; opacity: 0.8; }
+.mission-list { margin-top: 14px; border-top: 2px solid #C8643B; padding-top: 8px; }
+#fullmap-canvas { width: 100%; background: #12303F; border-radius: 10px; }
