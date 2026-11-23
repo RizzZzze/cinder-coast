@@ -25,12 +25,10 @@
         if (want !== c.visible && budgetUsed < 1) { c.visible = want; budgetUsed++; }
       });
       if (CC.city && CC.city.group) {
-        CC.city.group.traverse(function (o) {
-          if (o.isInstancedMesh && o.userData.boundingSphere) {
-            o.frustumCulled = true;
-            o.boundingSphere = o.userData.boundingSphere;
-          }
-        });
+        // Nothing to do here: every instanced mesh opts out of frustum
+        // culling at creation (CC.geo.instanced), because the vendored
+        // three.js culls an InstancedMesh from its geometry's bounding
+        // sphere at the shared origin. Do not re-enable culling here.
       }
     }
   };

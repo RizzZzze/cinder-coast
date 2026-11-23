@@ -132,6 +132,9 @@
       CC.hud.setObjective('Tow the Vesper to the Mercado garage');
       CC.hud.setProgress(0.55);
       CC.notify.push('Game saved');
+      // Fixed shot camera: the chase camera sits against the east-side
+      // building on the bridge approach, so pin the camera west and up.
+      CC.camera3.shotCam = { pos: [166, 7, -116], look: [181, 1.5, -168] };
       CC.camera3.setYaw(Math.PI);
     } else if (name === 'police') {
       var pc = CC.vehicles.make(S.scene, 'spindle', 0, 205, Math.PI, 0xC0392B);

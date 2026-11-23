@@ -48,38 +48,111 @@
     mesh.castShadow = true;
     return mesh;
   }
+  // Unit rectangular pyramid: base corners (+-0.5, 0, +-0.5), apex (0, 1, 0).
+  // Scaled by (w, h, d) its base lands exactly on the corners of a w x d
+  // building top, so a roof can never hover or float above its walls.
+  function pyramidGeometry() {
+    var c = [[-0.5, 0, -0.5], [0.5, 0, -0.5], [0.5, 0, 0.5], [-0.5, 0, 0.5]];
+    var apex = [0, 1, 0];
+    var tris = [];
+    for (var i = 0; i < 4; i++) {
+      var a = c[i], b = c[(i + 1) % 4];
+      tris.push(a, b, apex);
+    }
+    tris.push(c[0], apex, c[2]); tris.push(c[2], apex, c[0]);
+    var pos = [];
+    tris.forEach(function (v) { pos.push(v[0], v[1], v[2]); });
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.computeVertexNormals();
+    return geo;
+  }
   CC.geo = {
     mergeParts: mergeParts,
     meshFromParts: meshFromParts,
+    pyramidGeometry: pyramidGeometry,
+    // Instanced meshes in this build share one mesh at the world origin,
+    // and the vendored three.js (r149) culls an InstancedMesh as a whole
+    // from its geometry's bounding sphere at that origin. So every
+    // instanced mesh must opt out of frustum culling, or whole sets of
+    // buildings, roofs and props vanish whenever the origin leaves frame.
+    instanced: function (geo, mat, count) {
+      var m = new THREE.InstancedMesh(geo, mat, count);
+      m.frustumCulled = false;
+      return m;
+    },
     carBody: function (def, colour) {
       var c = colour === undefined ? def.colour : colour;
-      var dark = 0x1A1A22, glass = 0x9FC4D8;
-      var parts = [
-        { shape: 'box', w: def.wid, h: 0.62, d: def.len, x: 0, y: 0.55, z: 0, color: c },
-        { shape: 'box', w: def.wid * 0.82, h: 0.55, d: def.len * 0.48, x: 0, y: 1.08, z: -def.len * 0.06, color: glass }
-      ];
+      var dark = 0x1A1A22, glass = 0x9FC4D8, steel = 0x8A8F98;
+      var wid = def.wid, len = def.len;
+      var parts = [];
       if (def.kind === 'truck' || def.kind === 'lorry') {
+        // Cargo box with side ribs at the rear, cab with windshield and a
+        // short hood at the front (+z is forward), exhaust stack.
         parts = [
-          { shape: 'box', w: def.wid, h: 1.1, d: def.len * 0.62, x: 0, y: 0.85, z: def.len * 0.16, color: 0xD8D2C4 },
-          { shape: 'box', w: def.wid, h: 1.5, d: def.len * 0.3, x: 0, y: 1.05, z: -def.len * 0.32, color: c },
-          { shape: 'box', w: def.wid * 0.8, h: 0.5, d: 0.3, x: 0, y: 1.55, z: -def.len * 0.32, color: glass }
+          { shape: 'box', w: wid, h: 1.5, d: len * 0.6, x: 0, y: 1.05, z: -len * 0.2, color: 0xD8D2C4 },
+          { shape: 'box', w: wid + 0.06, h: 0.14, d: len * 0.6, x: 0, y: 1.86, z: -len * 0.2, color: c },
+          { shape: 'box', w: wid * 0.12, h: 1.5, d: len * 0.6, x: -wid / 2, y: 1.05, z: -len * 0.2, color: steel },
+          { shape: 'box', w: wid * 0.12, h: 1.5, d: len * 0.6, x: wid / 2, y: 1.05, z: -len * 0.2, color: steel },
+          { shape: 'box', w: wid * 0.9, h: 1.3, d: len * 0.3, x: 0, y: 1.05, z: len * 0.2, color: c },
+          { shape: 'box', w: wid * 0.82, h: 0.55, d: 0.1, x: 0, y: 1.35, z: len * 0.34, color: glass },
+          { shape: 'box', w: wid * 0.9, h: 0.4, d: len * 0.15, x: 0, y: 0.55, z: len * 0.42, color: c },
+          { shape: 'cyl', rTop: 0.09, rBot: 0.09, h: 1.6, x: wid / 2 - 0.15, y: 1.6, z: len * 0.08, color: dark },
+          { shape: 'box', w: wid, h: 0.2, d: 0.16, x: 0, y: 0.4, z: len / 2, color: dark },
+          { shape: 'box', w: 0.4, h: 0.16, d: 0.06, x: -wid * 0.3, y: 0.72, z: len / 2 + 0.01, color: 0xFFF2B0 },
+          { shape: 'box', w: 0.4, h: 0.16, d: 0.06, x: wid * 0.3, y: 0.72, z: len / 2 + 0.01, color: 0xFFF2B0 },
+          { shape: 'box', w: 0.34, h: 0.14, d: 0.06, x: -wid * 0.3, y: 0.8, z: -len / 2 - 0.01, color: 0xE0433A },
+          { shape: 'box', w: 0.34, h: 0.14, d: 0.06, x: wid * 0.3, y: 0.8, z: -len / 2 - 0.01, color: 0xE0433A }
         ];
+        var wR = 0.46;
+        [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (s) {
+          parts.push(
+            { shape: 'cyl', rTop: wR, rBot: wR, h: 0.3, x: s[0] * (wid / 2 - 0.05), y: wR, z: s[1] * len * 0.34, rz: Math.PI / 2, color: dark },
+            { shape: 'cyl', rTop: 0.22, rBot: 0.22, h: 0.32, x: s[0] * (wid / 2 - 0.05), y: wR, z: s[1] * len * 0.34, rz: Math.PI / 2, color: steel }
+          );
+        });
+        return meshFromParts(parts);
       }
       if (def.kind === 'bike') {
         parts = [
-          { shape: 'box', w: 0.5, h: 0.5, d: def.len, x: 0, y: 0.6, z: 0, color: c },
-          { shape: 'box', w: 0.3, h: 0.4, d: 0.7, x: 0, y: 1.0, z: -0.3, color: dark }
+          { shape: 'box', w: 0.5, h: 0.5, d: len, x: 0, y: 0.6, z: 0, color: c },
+          { shape: 'box', w: 0.3, h: 0.4, d: 0.7, x: 0, y: 1.0, z: -0.3, color: dark },
+          { shape: 'cyl', rTop: 0.34, rBot: 0.34, h: 0.16, x: 0, y: 0.34, z: len * 0.4, rz: Math.PI / 2, color: dark },
+          { shape: 'cyl', rTop: 0.34, rBot: 0.34, h: 0.16, x: 0, y: 0.34, z: -len * 0.4, rz: Math.PI / 2, color: dark }
         ];
+        return meshFromParts(parts);
       }
+      // Standard car: low body, sloped wedge hood, glass cabin with roof
+      // panel, trunk, bumpers, grille, headlights and taillights.
+      parts = [
+        { shape: 'box', w: wid, h: 0.55, d: len, x: 0, y: 0.55, z: 0, color: c },
+        { shape: 'box', w: wid * 0.92, h: 0.34, d: len * 0.3, x: 0, y: 0.88, z: len * 0.31, rx: 0.14, color: c },
+        { shape: 'box', w: wid * 0.8, h: 0.5, d: len * 0.44, x: 0, y: 1.05, z: -len * 0.05, color: glass },
+        { shape: 'box', w: wid * 0.78, h: 0.08, d: len * 0.4, x: 0, y: 1.33, z: -len * 0.05, color: c },
+        { shape: 'box', w: wid * 0.94, h: 0.3, d: len * 0.18, x: 0, y: 0.9, z: -len * 0.38, color: c },
+        { shape: 'box', w: wid, h: 0.16, d: 0.12, x: 0, y: 0.42, z: len / 2, color: dark },
+        { shape: 'box', w: wid, h: 0.16, d: 0.12, x: 0, y: 0.42, z: -len / 2, color: dark },
+        { shape: 'box', w: wid * 0.5, h: 0.18, d: 0.06, x: 0, y: 0.55, z: len / 2 + 0.01, color: dark },
+        { shape: 'box', w: 0.34, h: 0.14, d: 0.08, x: -wid * 0.3, y: 0.72, z: len / 2 + 0.01, color: 0xFFF2B0 },
+        { shape: 'box', w: 0.34, h: 0.14, d: 0.08, x: wid * 0.3, y: 0.72, z: len / 2 + 0.01, color: 0xFFF2B0 },
+        { shape: 'box', w: 0.3, h: 0.12, d: 0.08, x: -wid * 0.3, y: 0.75, z: -len / 2 - 0.01, color: 0xE0433A },
+        { shape: 'box', w: 0.3, h: 0.12, d: 0.08, x: wid * 0.3, y: 0.75, z: -len / 2 - 0.01, color: 0xE0433A }
+      ];
       if (def.kind === 'police') {
-        parts.push({ shape: 'box', w: def.wid * 0.5, h: 0.14, d: 0.5, x: 0, y: 1.42, z: -def.len * 0.06, color: 0xF2A81D });
+        parts.push(
+          { shape: 'box', w: wid * 1.01, h: 0.34, d: len * 0.4, x: 0, y: 0.62, z: -len * 0.02, color: 0xF4F2E8 },
+          { shape: 'box', w: wid * 0.78, h: 0.08, d: len * 0.4, x: 0, y: 1.33, z: -len * 0.05, color: 0xF4F2E8 },
+          { shape: 'box', w: wid * 0.6, h: 0.1, d: 0.5, x: 0, y: 1.4, z: -len * 0.05, color: dark },
+          { shape: 'box', w: 0.28, h: 0.14, d: 0.4, x: -wid * 0.16, y: 1.5, z: -len * 0.05, color: 0xE0433A },
+          { shape: 'box', w: 0.28, h: 0.14, d: 0.4, x: wid * 0.16, y: 1.5, z: -len * 0.05, color: 0x2B5F9E }
+        );
       }
-      parts.push(
-        { shape: 'cyl', rTop: 0.34, rBot: 0.34, h: 0.24, x: -def.wid / 2 + 0.12, y: 0.34, z: def.len * 0.32, rz: Math.PI / 2, color: dark },
-        { shape: 'cyl', rTop: 0.34, rBot: 0.34, h: 0.24, x: def.wid / 2 - 0.12, y: 0.34, z: def.len * 0.32, rz: Math.PI / 2, color: dark },
-        { shape: 'cyl', rTop: 0.34, rBot: 0.34, h: 0.24, x: -def.wid / 2 + 0.12, y: 0.34, z: -def.len * 0.32, rz: Math.PI / 2, color: dark },
-        { shape: 'cyl', rTop: 0.34, rBot: 0.34, h: 0.24, x: def.wid / 2 - 0.12, y: 0.34, z: -def.len * 0.32, rz: Math.PI / 2, color: dark }
-      );
+      [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(function (s) {
+        parts.push(
+          { shape: 'cyl', rTop: 0.38, rBot: 0.38, h: 0.3, x: s[0] * (wid / 2 - 0.05), y: 0.38, z: s[1] * len * 0.32, rz: Math.PI / 2, color: dark },
+          { shape: 'cyl', rTop: 0.2, rBot: 0.2, h: 0.32, x: s[0] * (wid / 2 - 0.05), y: 0.38, z: s[1] * len * 0.32, rz: Math.PI / 2, color: steel }
+        );
+      });
       return meshFromParts(parts);
     },
     personMesh: function (shirt, skin) {

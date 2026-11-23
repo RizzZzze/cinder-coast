@@ -22,11 +22,24 @@
       var keys = ['sprint', 'spindle', 'cutter', 'nomad', 'courier'];
       var defs = keys.map(function (k) { return CC.config.vehicles[k]; });
       var geo = CC.geo.mergeParts([
-        { shape: 'box', w: 1.9, h: 0.62, d: 4.2, x: 0, y: 0.55, z: 0, color: 0xFFFFFF },
-        { shape: 'box', w: 1.56, h: 0.55, d: 2.0, x: 0, y: 1.08, z: -0.25, color: 0x9FC4D8 }
+        { shape: 'box', w: 1.9, h: 0.55, d: 4.2, x: 0, y: 0.55, z: 0, color: 0xFFFFFF },
+        { shape: 'box', w: 1.75, h: 0.34, d: 1.26, x: 0, y: 0.88, z: 1.3, rx: 0.14, color: 0xFFFFFF },
+        { shape: 'box', w: 1.52, h: 0.5, d: 1.85, x: 0, y: 1.05, z: -0.21, color: 0x9FC4D8 },
+        { shape: 'box', w: 1.48, h: 0.08, d: 1.68, x: 0, y: 1.33, z: -0.21, color: 0xFFFFFF },
+        { shape: 'box', w: 1.79, h: 0.3, d: 0.76, x: 0, y: 0.9, z: -1.6, color: 0xFFFFFF },
+        { shape: 'box', w: 1.9, h: 0.16, d: 0.12, x: 0, y: 0.42, z: 2.1, color: 0x1A1A22 },
+        { shape: 'box', w: 1.9, h: 0.16, d: 0.12, x: 0, y: 0.42, z: -2.1, color: 0x1A1A22 },
+        { shape: 'box', w: 0.34, h: 0.14, d: 0.08, x: -0.57, y: 0.72, z: 2.11, color: 0xFFF2B0 },
+        { shape: 'box', w: 0.34, h: 0.14, d: 0.08, x: 0.57, y: 0.72, z: 2.11, color: 0xFFF2B0 },
+        { shape: 'box', w: 0.3, h: 0.12, d: 0.08, x: -0.57, y: 0.75, z: -2.11, color: 0xE0433A },
+        { shape: 'box', w: 0.3, h: 0.12, d: 0.08, x: 0.57, y: 0.75, z: -2.11, color: 0xE0433A },
+        { shape: 'cyl', rTop: 0.38, rBot: 0.38, h: 0.3, x: -0.9, y: 0.38, z: 1.34, rz: Math.PI / 2, color: 0x1A1A22 },
+        { shape: 'cyl', rTop: 0.38, rBot: 0.38, h: 0.3, x: 0.9, y: 0.38, z: 1.34, rz: Math.PI / 2, color: 0x1A1A22 },
+        { shape: 'cyl', rTop: 0.38, rBot: 0.38, h: 0.3, x: -0.9, y: 0.38, z: -1.34, rz: Math.PI / 2, color: 0x1A1A22 },
+        { shape: 'cyl', rTop: 0.38, rBot: 0.38, h: 0.3, x: 0.9, y: 0.38, z: -1.34, rz: Math.PI / 2, color: 0x1A1A22 }
       ]);
       var mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-      parked = new THREE.InstancedMesh(geo, mat, CC.config.caps.parked);
+      parked = CC.geo.instanced(geo, mat, CC.config.caps.parked);
       var m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
       var col = new THREE.Color();
       parkedData.length = 0;
