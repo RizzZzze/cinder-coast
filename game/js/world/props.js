@@ -61,8 +61,7 @@
         var bar = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 0.3), barrierMat);
         bar.position.set(-40 + b * 4, 0.5, 240); scene.add(bar);
       }
-      var sign = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 0.4),
-        new THREE.MeshLambertMaterial({ color: 0xF4E6C8 }));
+      var sign = CC.geo.textSign('PORT CALIDA', 10, 1.8);
       sign.position.set(-200, 10, 232); scene.add(sign);
       // Two posts carry the sign down to the ground, it no longer floats.
       [-203.5, -196.5].forEach(function (sx) {

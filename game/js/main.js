@@ -102,7 +102,7 @@
       S.shotFxTimer = (S.shotFxTimer || 0) + dt;
       if (S.shotFxTimer > 0.4) {
         S.shotFxTimer = 0;
-        CC.fx.tracer(-196, 1.4, 236, -200, 1.2, 220);
+        CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228);
         CC.fx.muzzle(-196, 1.4, 236);
       }
     }
@@ -192,8 +192,8 @@
         staticCar(S, 'taxi', 243.5, 28, 0, 0xF2A81D);
         staticCar(S, 'courier', 236.5, -8, Math.PI, 0xF4E6C8);
         staticCar(S, 'cutter', 243.5, -44, 0, 0xF2A81D);
-        CC.peds.spawnNear(S.scene, 246, -20, CC.rng.make(SEED + 603));
-        CC.traffic.spawnNear(S.scene, 246, -20, CC.rng.make(SEED + 604));
+        CC.peds.spawnNear(S.scene, 246, -20, CC.rng.make(S.seed + 603));
+        CC.traffic.spawnNear(S.scene, 246, -20, CC.rng.make(S.seed + 604));
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
@@ -207,8 +207,8 @@
         CC.vehicles.parked.push({ key: 'sprint', def: CC.config.vehicles.sprint, mesh: parkedCar.mesh, x: -148, z: 96, heading: Math.PI / 2, driver: false, colour: 0xE0433A });
         staticCar(S, 'taxi', -140, 84, Math.PI / 2, 0xF2A81D);
         staticCar(S, 'courier', -172, 84, -Math.PI / 2, 0xF4E6C8);
-        CC.peds.spawnNear(S.scene, -150, 92, CC.rng.make(SEED + 605));
-        CC.traffic.spawnNear(S.scene, -150, 92, CC.rng.make(SEED + 606));
+        CC.peds.spawnNear(S.scene, -150, 92, CC.rng.make(S.seed + 605));
+        CC.traffic.spawnNear(S.scene, -150, 92, CC.rng.make(S.seed + 606));
         S.health = 100; S.armour = 25;
         S.objective = null;
         CC.camera3.shotCam = { pos: [-158, 5, 120], look: [-138, 2, 78] };
@@ -220,27 +220,27 @@
         staticCar(S, 'cutter', -5, -396, Math.PI, 0xF2A81D);
         staticCar(S, 'nomad', 5, -402, Math.PI, 0x8A6B4A);
         var escort = CC.police.spawnUnit('cruiser');
-        if (escort) { escort.x = -4; escort.z = -362; escort.heading = Math.PI; escort.mesh.position.set(-4, 0, -362); escort.mesh.rotation.y = Math.PI; }
+        if (escort) { escort.x = -8; escort.z = -392; escort.heading = Math.PI; escort.mesh.position.set(-8, 0, -392); escort.mesh.rotation.y = Math.PI; }
         S.mission = { id: 5, name: 'Convoy', lorry: lorry, stages: [], stage: 1 };
         S.objective = { text: "Disable the lorry's engine", tx: 0, tz: -410, kind: 'mission' };
         S.objectiveDist = 30;
         S.missionProgress = 0.45;
         if (CC.notify) CC.notify.push('Game saved');
-        CC.camera3.shotCam = { pos: [-10, 9, -350], look: [0, 2, -410] };
+        CC.camera3.shotCam = { pos: [-12, 12, -342], look: [0, 2, -410] };
       } else if (name === 'police') {
         document.body.classList.add('shot-police');
-        S.player.x = -200; S.player.z = 220; S.player.heading = 0;
+        S.player.x = -196; S.player.z = 228; S.player.heading = 0;
         S.player.inVehicle = false;
-        if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-200, 0, 220); }
+        if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-196, 0, 228); }
         CC.wanted.setHeat(180);
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -186; swat.z = 236; swat.mesh.position.set(-186, 0, 236); swat.mesh.rotation.y = Math.PI * 0.75; }
+        if (swat) { swat.x = -180; swat.z = 240; swat.mesh.position.set(-180, 0, 240); swat.mesh.rotation.y = -0.9; }
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
-        if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -200, 1.2, 220); CC.fx.muzzle(-196, 1.4, 236); }
+        if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
         CC.camera3.shotCam = { pos: [-222, 6, 206], look: [-188, 1, 238] };

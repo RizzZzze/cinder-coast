@@ -32,12 +32,16 @@
     resume: function () {
       var S = CC.S;
       CC.menu.hideAll();
+      var hud = document.getElementById('hud');
+      if (hud) hud.style.display = '';
       if (S) S.mode = 'play';
     },
     showTitle: function () {
       var S = CC.S;
       if (!S) return;
       S.mode = 'title';
+      var hud = document.getElementById('hud');
+      if (hud) hud.style.display = 'none';
       var hasSave = CC.save ? CC.save.hasSave() : false;
       var sum = CC.save ? CC.save.summary() : null;
       var slot1 = sum ? ('Slot 1 — Chapter ' + sum.chapter + ' · ' + sum.cash + ' crowns · ' + (sum.vehicle || 'on foot')) : 'Slot 1 — Empty';
