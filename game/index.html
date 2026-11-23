@@ -4,167 +4,81 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cinder Coast — Port Calida</title>
-<link rel="icon" href="data:,">
 <link rel="stylesheet" href="styles/main.css">
+<script>window.CinderCoast = window.CinderCoast || {};</script>
 </head>
 <body>
 <div id="game"></div>
 <div id="damage-flash"></div>
-<div id="hud" style="display:none">
+<div id="hud">
   <div id="top-left">
     <div id="clock">16:30</div>
-    <div id="stars"><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span></div>
-    <div id="objective-line"><span id="objective"></span> <span id="objective-dist"></span></div>
+    <div id="stars"></div>
+    <div id="objective-line">Free roam — Port Calida</div>
+    <div id="objective-dist"></div>
     <div id="progress-wrap"><div id="progress-fill"></div></div>
   </div>
-  <div id="top-right"><div id="cash">120 cr</div><div id="standing">Standing 12</div></div>
+  <div id="top-right">
+    <div id="cash">800 crowns</div>
+    <div id="standing">Standing 0 · Chapter 1</div>
+  </div>
   <div id="feed"></div>
   <div id="bottom-left">
     <canvas id="minimap" width="180" height="180"></canvas>
     <div id="bars">
       <div class="bar"><div id="health-fill"></div></div>
-      <div class="bar armour"><div id="armour-fill"></div></div>
-      <div id="health-label">Health / Armour</div>
+      <div class="bar"><div id="armour-fill"></div></div>
+      <div id="health-label">Health 100 · Armour 25</div>
     </div>
   </div>
-  <div id="bottom-right"><div id="weapon-name">Kestrel 9</div><div id="ammo">12 / 60</div></div>
-  <div id="speedometer"><span id="speed">0</span> <span id="speed-unit">km/h</span><div id="gear">N</div><div class="bar damage"><div id="damage-bar"></div></div></div>
+  <div id="bottom-right">
+    <div id="ammo">Kestrel 9 12 / 24</div>
+  </div>
+  <div id="speedometer">0 km/h <span id="gear"></span><div class="bar"><div id="damage-bar"></div></div></div>
   <div id="prompt"></div>
   <div id="crosshair">+</div>
-  <div id="hitmarker">x</div>
+  <div id="hitmarker">✕</div>
 </div>
-<div id="title-screen" class="panel-screen">
-  <div class="panel">
-    <h1>CINDER COAST</h1>
-    <p class="subtitle">Port Calida &middot; an original open-world crime game</p>
-    <p class="story">In&eacute;s Varga, recovery-truck driver. Her brother Tomas vanished after copying the Pier Nine ledger. Captain Roque has a warrant out for her. Clear her name. Find Tomas.</p>
-    <button id="btn-new">New Game</button>
-    <button id="btn-continue">Continue</button>
-    <button id="btn-options">Options</button>
-    <button id="btn-controls">Controls</button>
-    <button id="btn-credits">Credits</button>
-    <div class="mission-list">
-      <button id="btn-mission1">Mission 1 — Wrong Tow</button>
-      <button id="btn-mission2">Mission 2 — Dead Drop</button>
-      <button id="btn-mission3">Mission 3 — Pier Nine</button>
-      <button id="btn-mission4">Mission 4 — Glass Floor</button>
-      <button id="btn-mission5">Mission 5 — Convoy</button>
-      <button id="btn-mission6">Mission 6 — Funicular</button>
-      <button id="btn-mission7">Mission 7 — Lantern Light</button>
-      <button id="btn-mission8">Mission 8 — Tidewater</button>
-      <button id="btn-towcall">Activity — Tow Call</button>
-      <button id="btn-courier">Activity — Courier Run</button>
-      <button id="btn-chop">Activity — Chop Order</button>
-    </div>
-    <p class="hint">Stage 2: all six districts, Missions 2–8, Courier Runs and Chop Orders. Gun shop and garage in Old Mercado, safehouses in the Quay and the Heights.</p>
-  </div>
-</div>
-<div id="pause-menu" class="panel-screen" style="display:none">
-  <div class="panel">
-    <h2>Paused</h2>
-    <button id="btn-resume">Resume</button>
-    <button id="btn-pause-map">Full Map</button>
-    <button id="btn-pause-save">Save Game</button>
-    <button id="btn-pause-options">Options</button>
-    <button id="btn-pause-controls">Controls</button>
-    <button id="btn-pause-quit">Quit to Title</button>
-  </div>
-</div>
-<div id="options-panel" class="panel-screen" style="display:none">
-  <div class="panel">
-    <h2>Options</h2>
-    <label>Master volume <input id="opt-master" type="range" min="0" max="1" step="0.05" value="0.8"></label>
-    <label>Music volume <input id="opt-music" type="range" min="0" max="1" step="0.05" value="0.6"></label>
-    <label>Effects volume <input id="opt-sfx" type="range" min="0" max="1" step="0.05" value="0.8"></label>
-    <label>Mouse sensitivity <input id="opt-sens" type="range" min="0.3" max="2" step="0.1" value="1"></label>
-    <label><input id="opt-northup" type="checkbox"> Minimap north-up</label>
-    <label>Speed units <select id="opt-units"><option value="km/h">km/h</option><option value="mph">mph</option></select></label>
-    <p class="hint">Sound: &#128266; synthesised engine, sirens, gunshots and a 96 BPM procedural music loop.</p>
-    <button id="btn-options-close">Close</button>
-  </div>
-</div>
-<div id="controls-panel" class="panel-screen" style="display:none">
-  <div class="panel">
-    <h2>Controls</h2>
-    <p>W A S D move / drive &middot; Shift sprint &middot; Space jump / handbrake &middot; Mouse look &middot; Left mouse fire &middot; Right mouse aim &middot; R reload &middot; 1–4 weapons &middot; E enter / exit &middot; F hijack / interact &middot; H horn &middot; C camera &middot; M full map &middot; Esc pause</p>
-    <button id="btn-controls-close">Close</button>
-  </div>
-</div>
-<div id="credits-panel" class="panel-screen" style="display:none">
-  <div class="panel">
-    <h2>Credits</h2>
-    <p>Cinder Coast — an original game. City, characters, vehicles, story, music and sound all original. Built with Three.js (MIT). No Rockstar / GTA content.</p>
-    <button id="btn-credits-close">Close</button>
-  </div>
-</div>
-<div id="shop-panel" class="panel-screen" style="display:none">
-  <div class="panel">
-    <h2 id="shop-title">Gun Shop</h2>
-    <div id="shop-list"></div>
-    <button id="btn-shop-close">Close</button>
-  </div>
-</div>
-<div id="result-card" class="panel-screen" style="display:none">
-  <div class="panel">
-    <h2 id="result-title">Mission Complete</h2>
-    <p id="result-body"></p>
-    <button id="btn-result-retry">Retry</button>
-    <button id="btn-result-continue">Continue</button>
-  </div>
-</div>
-<div id="death-card" class="panel-screen" style="display:none">
-  <div class="panel">
-    <h2>Hospital</h2>
-    <p id="death-body"></p>
-    <button id="btn-death-respawn">Wake up</button>
-  </div>
-</div>
-<div id="fullmap" class="panel-screen" style="display:none">
-  <div class="panel wide">
-    <h2>Port Calida — Full Map</h2>
-    <canvas id="fullmap-canvas" width="860" height="520"></canvas>
-    <button id="btn-fullmap-close">Close (M)</button>
-  </div>
-</div>
+<div id="screens"></div>
+
 <script src="vendor/three/three.min.js"></script>
-<script>window.CinderCoast = window.CinderCoast || {};</script>
-<script src="js/config.js"></script>
 <script src="js/util/rng.js"></script>
 <script src="js/util/geometry.js"></script>
 <script src="js/util/spatial.js"></script>
-<script src="js/world/city.js"></script>
+<script src="js/config.js"></script>
 <script src="js/world/districts.js"></script>
+<script src="js/world/city.js"></script>
 <script src="js/world/chunks.js"></script>
 <script src="js/world/props.js"></script>
 <script src="js/world/sky.js"></script>
-<script src="js/traffic/traffic.js"></script>
 <script src="js/traffic/lights.js"></script>
+<script src="js/traffic/traffic.js"></script>
 <script src="js/people/pedestrians.js"></script>
+<script src="js/player/camera.js"></script>
+<script src="js/player/player.js"></script>
+<script src="js/player/input.js"></script>
 <script src="js/vehicles/vehicles.js"></script>
 <script src="js/vehicles/driving.js"></script>
 <script src="js/vehicles/ownership.js"></script>
-<script src="js/player/player.js"></script>
-<script src="js/player/camera.js"></script>
-<script src="js/player/input.js"></script>
+<script src="js/police/wanted.js"></script>
+<script src="js/police/police.js"></script>
 <script src="js/combat/weapons.js"></script>
 <script src="js/combat/enemies.js"></script>
 <script src="js/combat/damage.js"></script>
-<script src="js/police/police.js"></script>
-<script src="js/police/wanted.js"></script>
-<script src="js/missions/missions.js"></script>
 <script src="js/missions/story.js"></script>
+<script src="js/missions/missions.js"></script>
 <script src="js/missions/activities.js"></script>
 <script src="js/missions/progression.js"></script>
+<script src="js/save/save.js"></script>
+<script src="js/ui/notify.js"></script>
 <script src="js/ui/hud.js"></script>
 <script src="js/ui/minimap.js"></script>
 <script src="js/ui/menu.js"></script>
-<script src="js/ui/notify.js"></script>
-<script src="js/audio/audio.js"></script>
-<script src="js/audio/sfx.js"></script>
-<script src="js/audio/music.js"></script>
-<script src="js/save/save.js"></script>
 <script src="js/fx/effects.js"></script>
 <script src="js/fx/quality.js"></script>
+<script src="js/audio/audio.js"></script>
+<script src="js/audio/music.js"></script>
+<script src="js/audio/sfx.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

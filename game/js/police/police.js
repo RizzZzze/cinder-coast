@@ -13,7 +13,7 @@
     onHeatChange: function () {
       var S = CC.S;
       if (!S) return;
-      if (CC.wanted.stars >= 3 && !S.roadblock) CC.police.makeRoadblock();
+      if (CC.wanted.stars >= 3 && !S.roadblock && !S.shotMode) CC.police.makeRoadblock();
       if (CC.wanted.stars < 3) S.roadblock = null;
       if (CC.sfx) CC.sfx.setSiren(CC.wanted.stars >= 1);
     },

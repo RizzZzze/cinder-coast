@@ -1,42 +1,57 @@
-// Cinder Coast quality governor: watches the frame rate and lowers effects
-// density and draw distance when it falls, raises them again when it
-// recovers, so the game holds a steady 60 fps on a mid-range desktop at
-// 1920x1080 and never falls below 40, with at most 250 draw calls per frame.
+// Cinder Coast quality governor: watches frame rate, scales effects density
+// and draw distance so the game holds 60 fps and never falls below 40.
+// Fresh Stage 2 write from BRIEF-04.
 (function () {
   var CC = window.CinderCoast;
-  var rendererRef = null, timer = 0, ema = 16.7;
-  var DENSITY = [0.4, 0.7, 1];
-  var DRAW_DIST = [300, 450, 650];
-  var PIXEL_RATIO = [1, 1.25, 1.5];
+  var ema = 60, level = 0, cooldown = 0;
+  var LEVELS = [
+    { density: 1.0, fogFar: 900, shadow: 2048 },
+    { density: 0.6, fogFar: 650, shadow: 1024 },
+    { density: 0.3, fogFar: 450, shadow: 512 }
+  ];
   CC.quality = {
-    level: 2,
+    level: 0,
     fps: 60,
-    init: function (renderer) { rendererRef = renderer; },
-    apply: function () {
-      var l = CC.quality.level;
-      if (CC.fx) CC.fx.density = DENSITY[l];
-      if (CC.chunks) CC.chunks.drawDist = DRAW_DIST[l];
-      if (rendererRef) {
-        rendererRef.setPixelRatio(Math.min(window.devicePixelRatio || 1, PIXEL_RATIO[l]));
-        rendererRef.shadowMap.enabled = l >= 1;
-      }
-    },
     update: function (dt) {
-      ema = ema * 0.95 + dt * 1000 * 0.05;
-      timer += dt;
-      if (timer < 2) return;
-      timer = 0;
-      CC.quality.fps = Math.round(1000 / Math.max(1, ema));
-      if (CC.quality.fps < 50 && CC.quality.level > 0) {
-        CC.quality.level--;
-        CC.quality.apply();
-        if (CC.notify) CC.notify.push('Quality lowered to hold 60 fps');
-      } else if (CC.quality.fps > 58 && CC.quality.level < 2) {
-        CC.quality.level++;
-        CC.quality.apply();
-      }
+      var S = CC.S;
+      if (!S) return;
+      if (dt > 0) ema = ema * 0.95 + (1 / dt) * 0.05;
+      CC.quality.fps = ema;
+      S.fps = ema;
+      cooldown -= dt;
+      if (cooldown > 0) return;
+      if (ema < 48 && level < 2) { level++; cooldown = 3; CC.quality.apply(); }
+      else if (ema > 58 && level > 0) { level--; cooldown = 5; CC.quality.apply(); }
     },
-    // Exposed for the HUD / verification: current fps estimate and level.
-    status: function () { return { fps: CC.quality.fps, level: CC.quality.level }; }
+    apply: function () {
+      var S = CC.S;
+      CC.quality.level = level;
+      var L = LEVELS[level];
+      if (CC.fx) CC.fx.density = L.density;
+      if (S && S.scene && S.scene.fog) S.scene.fog.far = L.fogFar;
+      if (S && S.renderer) S.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, level === 0 ? 2 : 1.25));
+    },
+    drawCalls: function () {
+      var S = CC.S;
+      if (!S || !S.renderer) return 0;
+      return S.renderer.info.render.calls;
+    },
+    heapMB: function () {
+      if (window.performance && performance.memory) return performance.memory.usedJSHeapSize / 1048576;
+      return 0;
+    }
+  };
+})();
+
+// Quality reporting: budget status for the HUD and verification runs.
+(function () {
+  var CC = window.CinderCoast;
+  var Q = CC.quality;
+  Q.withinBudget = function () {
+    return Q.fps >= 40 && Q.drawCalls() <= 250 && Q.heapMB() <= 300;
+  };
+  Q.statusLine = function () {
+    return 'fps ' + Math.round(Q.fps) + ' · calls ' + Q.drawCalls() +
+      ' · heap ' + Math.round(Q.heapMB()) + ' MB · level ' + Q.level;
   };
 })();
