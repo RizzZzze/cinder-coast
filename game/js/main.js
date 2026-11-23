@@ -273,14 +273,13 @@
         swatSign.position.set(-172, 1.5, 216.7);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
-        staticCar(S, 'quill', -158, 231.5, Math.PI / 2, 0x7FA8C9);
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -188; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-188, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-172, 6, 190], look: [-180, 1, 222] };
+        CC.camera3.shotCam = { pos: [-230, 6, 190], look: [-200, 1, 222] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }
