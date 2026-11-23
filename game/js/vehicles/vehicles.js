@@ -22,7 +22,7 @@
       return v;
     },
     spawnParked: function (scene, rng) {
-      while (parked.length < 10) {
+      while (parked.length < 18) {
         var road = CC.city.roads[rng.int(0, CC.city.roads.length - 1)];
         var along = rng.range(road.from + 20, road.to - 20);
         var side = rng.chance(0.5) ? 8.5 : -8.5;

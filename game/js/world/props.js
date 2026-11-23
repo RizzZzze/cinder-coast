@@ -72,10 +72,10 @@
       (function () {
         var _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(1, 1, 1), _p = new THREE.Vector3();
         var planterBase = CC.geo.instanced(new THREE.BoxGeometry(1.6, 0.7, 1.6),
-          new THREE.MeshLambertMaterial({ color: 0x8A6B4A }), 36);
+          new THREE.MeshLambertMaterial({ color: 0x8A6B4A }), 60);
         var planterTop = CC.geo.instanced(new THREE.BoxGeometry(1.4, 0.5, 1.4),
-          new THREE.MeshLambertMaterial({ color: 0x5E9A4A }), 36);
-        for (var pi = 0; pi < 36; pi++) {
+          new THREE.MeshLambertMaterial({ color: 0x5E9A4A }), 60);
+        for (var pi = 0; pi < 60; pi++) {
           var pr = CC.city.roads[rng.int(0, CC.city.roads.length - 1)];
           var pa = rng.range(pr.from + 20, pr.to - 20);
           if (pr.axis === 'ew') _p.set(pa, 0, pr.at + (rng.chance(0.5) ? 9.5 : -9.5));
@@ -113,17 +113,38 @@
         }
         bollards.instanceMatrix.needsUpdate = true; scene.add(bollards);
         var benchSeat = CC.geo.instanced(new THREE.BoxGeometry(2.4, 0.9, 0.8),
-          new THREE.MeshLambertMaterial({ color: 0x6B4A2F }), 12);
+          new THREE.MeshLambertMaterial({ color: 0x6B4A2F }), 24);
         var benchBack = CC.geo.instanced(new THREE.BoxGeometry(2.4, 0.9, 0.14),
-          new THREE.MeshLambertMaterial({ color: 0x6B4A2F }), 12);
-        for (var bei = 0; bei < 12; bei++) {
-          var bx = -120 + (bei % 6) * 24, bz = 60 + Math.floor(bei / 6) * 60;
+          new THREE.MeshLambertMaterial({ color: 0x6B4A2F }), 24);
+        for (var bei = 0; bei < 24; bei++) {
+          var bx = -240 + (bei % 8) * 30, bz = 60 + Math.floor(bei / 8) * 70;
           _q.identity(); _s.set(1, 1, 1);
           _p.set(bx, 0.45, bz); _m4.compose(_p, _q, _s); benchSeat.setMatrixAt(bei, _m4);
           _p.set(bx, 0.9, bz - 0.4); _m4.compose(_p, _q, _s); benchBack.setMatrixAt(bei, _m4);
         }
         benchSeat.instanceMatrix.needsUpdate = true; benchBack.instanceMatrix.needsUpdate = true;
         scene.add(benchSeat); scene.add(benchBack);
+        // Hydrants and bins along the kerbs, so sidewalks carry street furniture.
+        var hydrants = CC.geo.instanced(new THREE.CylinderGeometry(0.28, 0.34, 0.9, 8),
+          new THREE.MeshLambertMaterial({ color: 0xE0433A }), 24);
+        var bins = CC.geo.instanced(new THREE.CylinderGeometry(0.4, 0.36, 1.0, 8),
+          new THREE.MeshLambertMaterial({ color: 0x3A5A3A }), 24);
+        for (var hi = 0; hi < 24; hi++) {
+          var hr = CC.city.roads[rng.int(0, CC.city.roads.length - 1)];
+          var ha = rng.range(hr.from + 20, hr.to - 20);
+          if (hr.axis === 'ew') { _p.set(ha, 0.45, hr.at + (rng.chance(0.5) ? 9.5 : -9.5)); }
+          else { _p.set(hr.at + (rng.chance(0.5) ? 9.5 : -9.5), 0.45, ha); }
+          if (_p.z > 290) _p.z = 270;
+          _q.identity(); _s.set(1, 1, 1); _m4.compose(_p, _q, _s); hydrants.setMatrixAt(hi, _m4);
+          var hr2 = CC.city.roads[rng.int(0, CC.city.roads.length - 1)];
+          var ha2 = rng.range(hr2.from + 20, hr2.to - 20);
+          if (hr2.axis === 'ew') { _p.set(ha2, 0.5, hr2.at + (rng.chance(0.5) ? 9.5 : -9.5)); }
+          else { _p.set(hr2.at + (rng.chance(0.5) ? 9.5 : -9.5), 0.5, ha2); }
+          if (_p.z > 290) _p.z = 270;
+          _m4.compose(_p, _q, _s); bins.setMatrixAt(hi, _m4);
+        }
+        hydrants.instanceMatrix.needsUpdate = true; bins.instanceMatrix.needsUpdate = true;
+        scene.add(hydrants); scene.add(bins);
       })();
       return true;
     }

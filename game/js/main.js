@@ -152,7 +152,7 @@
     for (var i = 0; i < n; i++) {
       var u = CC.police.spawnUnit('cruiser');
       if (!u) break;
-      var back = 10 + i * 9, side = (i - 1) * 5;
+      var back = 9 + i * 7, side = (i - 1) * 7;
       u.x = x - Math.sin(heading) * back + Math.cos(heading) * side;
       u.z = z - Math.cos(heading) * back - Math.sin(heading) * side;
       u.heading = heading;
@@ -174,6 +174,21 @@
     if (v && CC.fx) CC.fx.headlightGlow(v);
     return v;
   }
+  // A standing crowd: pedestrians placed tight around a point, held still
+  // by a long look timer so they read as a crowd in the still.
+  function crowd(S, cx, cz, n, rng) {
+    var shirts = [0xC8643B, 0x2BB3B0, 0xF2A81D, 0x5E9A4A, 0xE0433A, 0x7FA8C9, 0xF4E6C8];
+    var skins = [0xE8B88A, 0xC98A5A, 0x8A5A3A, 0xF0C8A0];
+    var road = { axis: 'ew', at: 80, from: -320, to: 320 };
+    for (var i = 0; i < n; i++) {
+      var x = cx + rng.range(-14, 14), z = cz + rng.range(-8, 10);
+      var mesh = CC.geo.personMesh(rng.pick(shirts), rng.pick(skins));
+      mesh.position.set(x, 0, z);
+      mesh.rotation.y = rng.range(0, Math.PI * 2);
+      S.scene.add(mesh);
+      CC.peds.list.push({ mesh: mesh, x: x, z: z, road: road, along: x, dir: 1, speed: 0, state: 'look', lookTimer: 8, fleeX: 0, fleeZ: 0, bob: rng.range(0, 6), tipped: false });
+    }
+  }
   CC.shots = {
     apply: function (name) {
       var S = CC.S;
@@ -189,15 +204,17 @@
         policeBehind(S, 3, 246, -20, Math.PI);
         heliOver(S, 252, 18, 55);
         staticCar(S, 'taxi', 236.5, -58, Math.PI, 0xF2A81D);
-        staticCar(S, 'taxi', 243.5, 28, 0, 0xF2A81D);
+        staticCar(S, 'taxi', 236, 20, 0, 0xF2A81D);
         staticCar(S, 'courier', 236.5, -8, Math.PI, 0xF4E6C8);
-        staticCar(S, 'cutter', 243.5, -44, 0, 0xF2A81D);
+        staticCar(S, 'cutter', 238, -38, 0, 0xF2A81D);
+        staticCar(S, 'quill', 232, -30, 0, 0x7FA8C9);
         CC.peds.spawnNear(S.scene, 246, -20, CC.rng.make(S.seed + 603));
         CC.traffic.spawnNear(S.scene, 246, -20, CC.rng.make(S.seed + 604));
+        CC.traffic.spawnNear(S.scene, 246, -20, CC.rng.make(S.seed + 607));
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
-        CC.camera3.shotCam = { pos: [258, 6, -52], look: [240, 2, 8] };
+        CC.camera3.shotCam = { pos: [264, 9, -62], look: [240, 2, 2] };
       } else if (name === 'foot') {
         S.player.x = -150; S.player.z = 92; S.player.heading = 0.6;
         S.player.inVehicle = false;
@@ -207,6 +224,9 @@
         CC.vehicles.parked.push({ key: 'sprint', def: CC.config.vehicles.sprint, mesh: parkedCar.mesh, x: -148, z: 96, heading: Math.PI / 2, driver: false, colour: 0xE0433A });
         staticCar(S, 'taxi', -140, 84, Math.PI / 2, 0xF2A81D);
         staticCar(S, 'courier', -172, 84, -Math.PI / 2, 0xF4E6C8);
+        staticCar(S, 'quill', -130, 84, Math.PI / 2, 0x7FA8C9);
+        staticCar(S, 'nomad', -168, 84, -Math.PI / 2, 0x8A6B4A);
+        crowd(S, -150, 98, 12, CC.rng.make(S.seed + 608));
         CC.peds.spawnNear(S.scene, -150, 92, CC.rng.make(S.seed + 605));
         CC.traffic.spawnNear(S.scene, -150, 92, CC.rng.make(S.seed + 606));
         S.health = 100; S.armour = 25;
@@ -219,6 +239,8 @@
         lorry.mission = true; lorry.engineHealth = 100; lorry.speed = 8;
         staticCar(S, 'cutter', -5, -396, Math.PI, 0xF2A81D);
         staticCar(S, 'nomad', 5, -402, Math.PI, 0x8A6B4A);
+        staticCar(S, 'taxi', 6, -412, Math.PI, 0xF2A81D);
+        staticCar(S, 'quill', -6, -418, Math.PI, 0x7FA8C9);
         var escort = CC.police.spawnUnit('cruiser');
         if (escort) { escort.x = -8; escort.z = -392; escort.heading = Math.PI; escort.mesh.position.set(-8, 0, -392); escort.mesh.rotation.y = Math.PI; }
         S.mission = { id: 5, name: 'Convoy', lorry: lorry, stages: [], stage: 1 };
@@ -236,15 +258,22 @@
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -210; swat.z = 234; swat.mesh.position.set(-210, 0, 234); swat.mesh.rotation.y = Math.PI / 2; }
-        staticCar(S, 'swat', -205, 240, Math.PI / 2);
+        if (swat) { swat.x = -196; swat.z = 252; swat.mesh.position.set(-196, 0, 252); swat.mesh.rotation.y = Math.PI / 2; }
+        staticCar(S, 'swat', -212, 230, Math.PI / 2);
+        // A SWAT sign on the van's camera-facing side, so the van reads
+        // unmistakably and is never mistaken for a civilian truck.
+        var swatSign = CC.geo.textSign('SWAT', 4, 0.8);
+        swatSign.position.set(-212, 1.5, 228.8);
+        swatSign.rotation.y = Math.PI;
+        S.scene.add(swatSign);
+        staticCar(S, 'quill', -240, 214, Math.PI / 2, 0x7FA8C9);
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-222, 6, 206], look: [-188, 1, 238] };
+        CC.camera3.shotCam = { pos: [-232, 8, 196], look: [-186, 1, 240] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }

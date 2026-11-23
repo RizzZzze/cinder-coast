@@ -30,6 +30,44 @@
       beach.rotation.x = -Math.PI / 2;
       beach.position.set(350, 0.05, -110);
       scene.add(beach);
+      // Detailed ground: varied-tone paving slabs fill every block interior,
+      // so no shot shows a vast flat tan expanse. One merged mesh.
+      (function () {
+        var prng = CC.rng.make(seed + 700);
+        var tones = [0xB89A72, 0xD8B48E, 0xC49A6A, 0xD0A878, 0xC09A70];
+        var ew = [-480, -320, -240, -160, -80, 0, 80, 160, 240, 320];
+        var ns = [-320, -240, -160, -80, 0, 80, 160, 240, 320];
+        var pparts = [];
+        for (var ei = 0; ei < ew.length - 1; ei++) {
+          for (var ni = 0; ni < ns.length - 1; ni++) {
+            var cx = (ns[ni] + ns[ni + 1]) / 2 + prng.range(-6, 6);
+            var cz = (ew[ei] + ew[ei + 1]) / 2 + prng.range(-6, 6);
+            if (cx > 320 || cz < -520 || cz > 320) continue;
+            if (Math.abs(cx) < 16 && cz > -480 && cz < -160) continue;
+            var pw = Math.min(ns[ni + 1] - ns[ni], ew[ei + 1] - ew[ei]) * prng.range(0.45, 0.7);
+            pparts.push({ shape: 'box', w: pw, h: 0.04, d: pw * prng.range(0.6, 1), x: cx, y: 0.02, z: cz, color: tones[Math.floor(prng.range(0, tones.length))] });
+          }
+        }
+        // Plaza slabs at the market and the quay, the two on-foot areas.
+        [[-150, 92, 46, 30], [-120, 108, 30, 18], [-210, 244, 44, 28], [-180, 210, 26, 16]].forEach(function (pl) {
+          pparts.push({ shape: 'box', w: pl[2], h: 0.04, d: pl[3], x: pl[0], y: 0.02, z: pl[1], color: tones[Math.floor(prng.range(0, tones.length))] });
+        });
+        // Crosswalks at every central junction: white stripes across both
+        // roads, one merged mesh, so every junction reads as a street.
+        var crng = CC.rng.make(seed + 701);
+        for (var jz = 0; jz < ew.length; jz++) {
+          for (var jx = 0; jx < ns.length; jx++) {
+            var jX = ns[jx], jZ = ew[jz];
+            for (var s = 0; s < 5; s++) {
+              pparts.push({ shape: 'box', w: 4.0, h: 0.04, d: 0.55, x: jX, y: 0.09, z: jZ - 5.6 + s * 2.8, color: 0xF4E6C8 });
+              pparts.push({ shape: 'box', w: 0.55, h: 0.04, d: 4.0, x: jX - 5.6 + s * 2.8, y: 0.09, z: jZ, color: 0xF4E6C8 });
+            }
+          }
+        }
+        var pave = CC.geo.meshFromParts(pparts);
+        pave.receiveShadow = true;
+        scene.add(pave);
+      })();
       roads.forEach(function (r) {
         var len = r.to - r.from;
         var mid = (r.from + r.to) / 2;
