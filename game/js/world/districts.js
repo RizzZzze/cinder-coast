@@ -5,6 +5,8 @@
   var CC = window.CinderCoast;
   var WALL = 0xD8B98A, STUCCO = 0xF4E6C8, TERRA = 0xC8643B, GLASS = 0x9FC4D8;
   var DARK = 0x2B2B33, CREAM = 0xF4E6C8;
+  var signs = [];
+  var NEON = [0xE0433A, 0x2BB3B0, 0xF2A81D, 0xFFD166, 0xE86AA0];
   function facade(rng, parts, x, z, w, h, wall, roof, opts) {
     opts = opts || {};
     var d = w;
@@ -19,14 +21,26 @@
     }
     var rows = Math.max(1, Math.floor((h - 3) / 3.2));
     var cols = Math.max(2, Math.floor(w / 3));
+    var lit = rng.chance(0.4) ? 0xFFD166 : GLASS;
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
         var wx = x - w / 2 + (c + 0.5) * (w / cols);
         var wy = 3.4 + r * 3.2;
         if (wy > h - 1) continue;
-        parts.push({ shape: 'box', w: 1.2, h: 1.4, d: 0.12, x: wx, y: wy, z: z + d / 2 + 0.04, color: GLASS });
-        if (opts.bothSides) parts.push({ shape: 'box', w: 1.2, h: 1.4, d: 0.12, x: wx, y: wy, z: z - d / 2 - 0.04, color: GLASS });
+        var wc = rng.chance(0.3) ? 0xFFD166 : GLASS;
+        parts.push({ shape: 'box', w: 1.2, h: 1.4, d: 0.12, x: wx, y: wy, z: z + d / 2 + 0.04, color: wc });
+        if (opts.bothSides) parts.push({ shape: 'box', w: 1.2, h: 1.4, d: 0.12, x: wx, y: wy, z: z - d / 2 - 0.04, color: wc });
+        // Side faces get windows too, so a building seen side-on is never a blank wall.
+        var wz = z - d / 2 + (c + 0.5) * (d / cols);
+        parts.push({ shape: 'box', w: 0.12, h: 1.4, d: 1.2, x: x - w / 2 - 0.04, y: wy, z: wz, color: wc });
+        parts.push({ shape: 'box', w: 0.12, h: 1.4, d: 1.2, x: x + w / 2 + 0.04, y: wy, z: wz, color: wc });
       }
+    }
+    // Neon strip under the sign line, varied per building.
+    parts.push({ shape: 'box', w: w * 0.82, h: 0.18, d: 0.14, x: x, y: 3.35, z: z + d / 2 + 0.06, color: NEON[Math.floor(rng.range(0, NEON.length))] });
+    if (opts.name) {
+      signs.push({ text: opts.name, x: x, y: 4.6, z: z + d / 2 + 0.14, w: Math.min(w * 0.86, 11), h: 1.5, ry: 0, bg: opts.signBg });
+      if (opts.shop) signs.push({ text: opts.name, x: x - w / 2 - 0.14, y: 4.6, z: z, w: Math.min(w * 0.86, 11), h: 1.5, ry: -Math.PI / 2, bg: opts.signBg });
     }
     if (opts.shop) {
       parts.push({ shape: 'box', w: w * 0.7, h: 2.0, d: 0.14, x: x, y: 1.2, z: z + d / 2 + 0.05, color: GLASS });
@@ -52,25 +66,34 @@
   var builders = {};
   builders.mercado = function (parts, rng) {
     var cols = [0xC8643B, 0xF2A81D, 0x2BB3B0, 0xE0433A];
+    var names = ['TACOS EL FARO', 'CASA MERCADO', 'PANADERIA SOL', 'CANTINA ROJA', 'FRUTERIA LUNA', 'CARNICERIA', 'CAFE CALIDA', 'FLORES MARIA', 'PESCADERIA', 'HOTEL MIRAMAR', 'CASINO SOL', 'BAR LA LUZ', 'HELADERIA', 'TEATRO LUNA', 'LIBRERIA', 'MERCADO GUN SHOP'];
     for (var i = 0; i < 16; i++) {
       var x = -220 + (i % 4) * 52 + rng.range(-6, 6);
       var z = -20 + Math.floor(i / 4) * 44 + rng.range(-5, 5);
       facade(rng, parts, x, z, rng.range(9, 13), rng.range(7, 12), i % 3 ? WALL : STUCCO,
-        i % 2 ? TERRA : 0x8A5A3A, { shop: true, awning: cols[i % 4], chimney: rng.chance(0.4), balcony: rng.chance(0.4), bothSides: true });
+        i % 2 ? TERRA : 0x8A5A3A, { shop: true, awning: cols[i % 4], chimney: rng.chance(0.4), balcony: rng.chance(0.4), bothSides: true, name: names[i] });
     }
     for (var s = 0; s < 10; s++) stall(parts, -200 + s * 16, 96 + (s % 2) * 10, cols[s % 4]);
     parts.push({ shape: 'box', w: 30, h: 9, d: 20, x: -120, y: 4.5, z: 60, color: STUCCO });
     parts.push({ shape: 'cone', r: 21.2, h: 4, seg: 4, x: -120, y: 11, z: 60, ry: Math.PI / 4, color: TERRA });
     parts.push({ shape: 'box', w: 12, h: 3.4, d: 0.14, x: -120, y: 1.9, z: 70.05, color: GLASS });
     parts.push({ shape: 'box', w: 24, h: 0.16, d: 3.4, x: -120, y: 4.4, z: 71.4, rx: 0.28, color: 0xF2A81D });
+    // Food hall front: big sign, awning and side windows break the blank pale wall.
+    signs.push({ text: 'FOOD HALL', x: -120, y: 6.2, z: 70.14, w: 18, h: 2.2, ry: 0 });
+    signs.push({ text: 'FOOD HALL', x: -135.14, y: 6.2, z: 60, w: 14, h: 2.0, ry: -Math.PI / 2 });
+    parts.push({ shape: 'box', w: 0.14, h: 1.4, d: 1.2, x: -135.06, y: 4.5, z: 55, color: GLASS });
+    parts.push({ shape: 'box', w: 0.14, h: 1.4, d: 1.2, x: -135.06, y: 4.5, z: 65, color: GLASS });
+    parts.push({ shape: 'box', w: 0.14, h: 1.4, d: 1.2, x: -104.94, y: 4.5, z: 55, color: 0xFFD166 });
+    parts.push({ shape: 'box', w: 0.14, h: 1.4, d: 1.2, x: -104.94, y: 4.5, z: 65, color: GLASS });
     CC.spatial.addBox(-120, 60, 15, 10);
   };
   builders.lantern = function (parts, rng) {
+    var names = ['HOTEL LANTERN', 'CAFE PARK', 'TEATRO LUNA', 'LIBRERIA', 'BAR LA LUZ', 'HELADERIA', 'HOTEL PALMA', 'CINE ORO', 'CAFE CALIDA', 'FLORES MARIA'];
     for (var i = 0; i < 10; i++) {
       var a = (i / 10) * Math.PI * 2;
       var x = 60 + Math.cos(a) * 62, z = Math.sin(a) * 48;
       facade(rng, parts, x, z, rng.range(10, 13), rng.range(9, 15), STUCCO, TERRA,
-        { shop: i % 2 === 0, bothSides: true, balcony: true, chimney: rng.chance(0.3) });
+        { shop: i % 2 === 0, bothSides: true, balcony: true, chimney: rng.chance(0.3), name: names[i] });
     }
     parts.push({ shape: 'cyl', rTop: 7, rBot: 9, h: 140, seg: 10, x: 60, y: 70, z: 0, color: STUCCO });
     parts.push({ shape: 'cyl', rTop: 13, rBot: 13, h: 4, seg: 10, x: 60, y: 122, z: 0, color: GLASS });
@@ -83,28 +106,32 @@
   };
 
   builders.sunfield = function (parts, rng) {
+    var names = ['CASINO GOLDEN HOUR', 'HOTEL GLASSWING', 'BAR NEON', 'MOTEL SUNFIELD', 'TACOS SOL', 'CASINO BRISA', 'CLUB NOCHE', 'HOTEL VISTA', 'CAFE SOL', 'BAR LA LUZ', 'HOTEL PALMA', 'CINE ORO'];
     for (var i = 0; i < 12; i++) {
       var x = 180 + (i % 3) * 52 + rng.range(-4, 4);
       var z = -60 + Math.floor(i / 3) * 62 + rng.range(-5, 5);
       facade(rng, parts, x, z, rng.range(10, 14), rng.range(10, 18), i % 2 ? 0xF4E6C8 : 0xE8D8B8,
-        0x2BB3B0, { shop: true, flat: i % 3 === 0, bothSides: true, balcony: true, awning: 0x2BB3B0 });
+        0x2BB3B0, { shop: true, flat: i % 3 === 0, bothSides: true, balcony: true, awning: 0x2BB3B0, name: names[i] });
     }
     parts.push({ shape: 'box', w: 22, h: 42, d: 18, x: 240, y: 21, z: 80, color: GLASS });
     parts.push({ shape: 'cyl', rTop: 9, rBot: 9, h: 42, seg: 10, x: 240, y: 21, z: 92, color: 0xBFE0EA });
     parts.push({ shape: 'box', w: 24, h: 1.0, d: 20, x: 240, y: 42.5, z: 80, color: TERRA });
     parts.push({ shape: 'box', w: 18, h: 2.2, d: 0.14, x: 240, y: 1.3, z: 89.05, color: GLASS });
     parts.push({ shape: 'box', w: 20, h: 0.16, d: 3.0, x: 240, y: 3.6, z: 90.4, rx: 0.28, color: 0xE0433A });
+    signs.push({ text: 'GLASSWING HOTEL', x: 240, y: 6.0, z: 89.14, w: 18, h: 2.0, ry: 0 });
+    signs.push({ text: 'GLASSWING HOTEL', x: 228.86, y: 6.0, z: 80, w: 14, h: 1.8, ry: -Math.PI / 2 });
     CC.spatial.addBox(240, 80, 12, 10);
     for (var b = 0; b < 14; b++) {
       parts.push({ shape: 'box', w: 3, h: 0.3, d: 8, x: 312, y: 0.35, z: -40 + b * 16, color: 0x8A6B4A });
     }
   };
   builders.heights = function (parts, rng) {
+    var names = ['HOTEL BRIGHTWATER', 'CAFE ALTURA', 'BANK CALIDA', 'TORRE OFFICES', 'HOTEL CIELO', 'RESTAURANTE MAR', 'HOTEL VISTA', 'CAFE SOL', 'BANK CALIDA', 'TORRE OFFICES', 'HOTEL CIELO', 'CAFE ALTURA'];
     for (var i = 0; i < 12; i++) {
       var x = -40 + (i % 4) * 48 + rng.range(-5, 5);
       var z = -220 - Math.floor(i / 4) * 62 + rng.range(-6, 6);
       facade(rng, parts, x, z, rng.range(10, 14), rng.range(8, 14), STUCCO, TERRA,
-        { flat: i % 2 === 0, bothSides: true, balcony: true, chimney: rng.chance(0.5) });
+        { flat: i % 2 === 0, bothSides: true, balcony: true, chimney: rng.chance(0.5), name: names[i] });
     }
     for (var t = 0; t < 4; t++) {
       var tx = 90 + t * 28, tz = -260 - t * 40;
@@ -125,12 +152,19 @@
     CC.spatial.addBox(40, -480, 3, 4);
   };
   builders.ironbridge = function (parts, rng) {
+    var names = ['FREIGHT YARD', 'GARAGE IRON', 'WAREHOUSE 9', 'DOCKERS BAR', 'FERRY OFFICE', 'STEEL WORKS', 'GARAGE TIDEWELL', 'MARKET STALL'];
     for (var i = 0; i < 8; i++) {
       var x = -280 + (i % 4) * 52, z = -320 + Math.floor(i / 4) * 70;
       parts.push({ shape: 'box', w: 22, h: 10, d: 16, x: x, y: 5, z: z, color: 0x8A8F98 });
       parts.push({ shape: 'box', w: 23, h: 0.8, d: 17, x: x, y: 10.4, z: z, color: 0x5A5A66 });
       parts.push({ shape: 'cyl', rTop: 1.2, rBot: 1.6, h: 14, seg: 8, x: x + 7, y: 17, z: z - 4, color: 0x6B4A2F });
       parts.push({ shape: 'box', w: 6, h: 3, d: 0.14, x: x, y: 2, z: z + 8.05, color: GLASS });
+      parts.push({ shape: 'box', w: 1.2, h: 1.4, d: 0.12, x: x - 6, y: 6.5, z: z + 8.05, color: 0xFFD166 });
+      parts.push({ shape: 'box', w: 1.2, h: 1.4, d: 0.12, x: x + 6, y: 6.5, z: z + 8.05, color: GLASS });
+      parts.push({ shape: 'box', w: 0.12, h: 1.4, d: 1.2, x: x - 11.06, y: 6.5, z: z, color: GLASS });
+      parts.push({ shape: 'box', w: 0.12, h: 1.4, d: 1.2, x: x + 11.06, y: 6.5, z: z, color: 0xFFD166 });
+      parts.push({ shape: 'box', w: 14, h: 0.18, d: 0.14, x: x, y: 8.2, z: z + 8.06, color: 0xF2A81D });
+      signs.push({ text: names[i], x: x, y: 5.2, z: z + 8.14, w: 13, h: 1.6, ry: 0 });
       CC.spatial.addBox(x, z, 11, 8);
     }
     for (var w = 0; w < 5; w++) {
@@ -154,6 +188,7 @@
     builders: builders,
     buildAll: function (scene, seed) {
       var rng = CC.rng.make(seed + 500);
+      signs.length = 0;
       var ids = ['mercado', 'lantern', 'sunfield', 'heights', 'ironbridge'];
       ids.forEach(function (id) {
         var parts = [];
@@ -162,6 +197,12 @@
         var mesh = CC.geo.meshFromParts(parts);
         mesh.receiveShadow = true;
         scene.add(mesh);
+      });
+      signs.forEach(function (sg) {
+        var sign = CC.geo.textSign(sg.text, sg.w, sg.h, sg.bg || '#1F3A5F');
+        sign.position.set(sg.x, sg.y, sg.z);
+        sign.rotation.y = sg.ry || 0;
+        scene.add(sign);
       });
       return true;
     }

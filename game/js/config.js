@@ -4,16 +4,16 @@
   var CC = window.CinderCoast;
   CC.config = {
     seed: 7,
-    timeOfDay: 16.5,
+    timeOfDay: 17.5,
     saveVersion: 2,
     palette: {
       sandstone: 0xD8B98A, stucco: 0xF4E6C8, terracotta: 0xC8643B,
       water: 0x2BB3B0, palm: 0x5E9A4A, asphalt: 0x3A3A44, policeNavy: 0x1F3A5F,
-      amber: 0xF2A81D, gold: 0xFFD166, skyTop: 0x7FB8D8, skyHorizon: 0xF4B67A,
+      amber: 0xF2A81D, gold: 0xFFD166, skyTop: 0x5A3A7A, skyHorizon: 0xFF7A4A,
       wall: 0xD8B98A, roof: 0xC8643B, glass: 0x9FC4D8
     },
     tuning: { walkSpeed: 5.2, sprintSpeed: 8.5, jumpSpeed: 7.5, gravity: 20, aimZoom: 0.6 },
-    caps: { traffic: 14, pedestrians: 24, police: 12, enemies: 10 },
+    caps: { traffic: 26, pedestrians: 48, police: 12, enemies: 10 },
     heatFor: { stealCar: 15, strikeCivilian: 5, fireInView: 10, destroyPolice: 30, crashInjury: 10, killWitnessed: 25 },
     heatStars: [0, 20, 50, 100, 180, 260],
     heatDecay: { after: [20, 20, 30, 30, 45, 45], stepSeconds: 12 },
@@ -24,6 +24,7 @@
       nomad:    { name: 'Ferro Nomad', kind: 'car', colour: 0x8A6B4A, wid: 2.0, len: 4.6, top: 30, accel: 13, grip: 0.95 },
       courier:  { name: 'Courier Van', kind: 'truck', colour: 0xF4E6C8, wid: 2.1, len: 5.0, top: 28, accel: 12, grip: 0.9 },
       quill:    { name: 'Quill Hatch', kind: 'car', colour: 0x7FA8C9, wid: 1.8, len: 3.8, top: 32, accel: 15, grip: 1.0 },
+      taxi:     { name: 'Sunfield Taxi', kind: 'car', colour: 0xF2A81D, wid: 1.9, len: 4.2, top: 32, accel: 15, grip: 1.0 },
       tow:      { name: 'Tidewell Tow', kind: 'truck', colour: 0xE8A33D, wid: 2.1, len: 5.2, top: 29, accel: 12, grip: 0.9 },
       ardent:   { name: 'Calida Ardent', kind: 'police', colour: 0x1F3A5F, wid: 1.9, len: 4.4, top: 40, accel: 20, grip: 1.15 },
       haul:     { name: 'Brasswater Haul', kind: 'lorry', colour: 0x6B7A8A, wid: 2.4, len: 7.0, top: 24, accel: 9, grip: 0.85 },

@@ -48,7 +48,7 @@
       if (!S) return;
       var clock = el('clock');
       if (clock) {
-        var h = Math.floor(S.timeOfDay || 16.5), m = Math.floor(((S.timeOfDay || 16.5) - h) * 60);
+        var h = Math.floor(S.timeOfDay || 17.5), m = Math.floor(((S.timeOfDay || 17.5) - h) * 60);
         clock.textContent = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
       }
       var sp = el('speedometer');

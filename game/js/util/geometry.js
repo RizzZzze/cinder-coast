@@ -168,6 +168,29 @@
         { shape: 'cone', r: 1.6, h: 1.6, x: 0, y: 5.9, z: 0, color: 0x5E9A4A },
         { shape: 'cone', r: 1.2, h: 1.2, x: 0, y: 6.6, z: 0, color: 0x6FAE56 }
       ]);
+    },
+    // Canvas-text shop sign: a plane with a readable name, gold border on
+    // dark navy by default. Text is drawn once per sign; keep names short.
+    textSign: function (text, w, h, bg, fg) {
+      var cv = document.createElement('canvas');
+      cv.width = 512; cv.height = 96;
+      var cx = cv.getContext('2d');
+      cx.fillStyle = bg || '#1F3A5F';
+      cx.fillRect(0, 0, 512, 96);
+      cx.strokeStyle = '#FFD166'; cx.lineWidth = 6;
+      cx.strokeRect(4, 4, 504, 88);
+      cx.fillStyle = fg || '#FFD166';
+      cx.font = 'bold 52px system-ui, sans-serif';
+      cx.textAlign = 'center'; cx.textBaseline = 'middle';
+      var label = String(text).toUpperCase();
+      var tw = cx.measureText(label).width;
+      if (tw > 470) cx.font = 'bold ' + Math.floor(52 * 470 / tw) + 'px system-ui, sans-serif';
+      cx.fillText(label, 256, 52);
+      var tex = new THREE.CanvasTexture(cv);
+      var mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
+        new THREE.MeshBasicMaterial({ map: tex }));
+      mesh.userData.isSign = true;
+      return mesh;
     }
   };
 })();

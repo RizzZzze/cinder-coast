@@ -5,7 +5,7 @@
   var CC = window.CinderCoast;
   var params = new URLSearchParams(window.location.search);
   var SEED = parseInt(params.get('seed') || '7', 10);
-  var TIME_OF_DAY = parseFloat(params.get('time') || '16.5');
+  var TIME_OF_DAY = parseFloat(params.get('time') || '17.5');
   var SHOT = params.get('shot') || '';
   function newState(scene, camera, renderer) {
     return {
@@ -106,6 +106,24 @@
         CC.fx.muzzle(-196, 1.4, 236);
       }
     }
+    if (S.shotMode && S.shot === 'chase' && CC.fx && S.police && S.police.length) {
+      S.shotFxTimer = (S.shotFxTimer || 0) + dt;
+      if (S.shotFxTimer > 0.5) {
+        S.shotFxTimer = 0;
+        var lead = S.police[0];
+        CC.fx.tracer(lead.x, 1.4, lead.z, S.player.x, 1.2, S.player.z);
+        CC.fx.muzzle(lead.x, 1.4, lead.z);
+        CC.fx.sparks(S.player.x + 4, 0.5, S.player.z - 6);
+      }
+    }
+    if (S.shotMode && S.shot === 'mission' && CC.fx) {
+      S.shotFxTimer = (S.shotFxTimer || 0) + dt;
+      if (S.shotFxTimer > 0.6) {
+        S.shotFxTimer = 0;
+        CC.fx.sparks(0, 1.2, -408);
+        CC.fx.muzzle(0, 1.4, -408);
+      }
+    }
     if (CC.quality) CC.quality.update(dt);
     if (CC.chunks) CC.chunks.update(dt);
     if (CC.sky) CC.sky.follow(S.player.x, S.player.z);
@@ -134,13 +152,27 @@
     for (var i = 0; i < n; i++) {
       var u = CC.police.spawnUnit('cruiser');
       if (!u) break;
-      u.x = x - Math.sin(heading) * (10 + i * 9);
-      u.z = z - Math.cos(heading) * (10 + i * 9);
+      var back = 10 + i * 9, side = (i - 1) * 5;
+      u.x = x - Math.sin(heading) * back + Math.cos(heading) * side;
+      u.z = z - Math.cos(heading) * back - Math.sin(heading) * side;
       u.heading = heading;
       u.mesh.position.set(u.x, 0, u.z);
       u.mesh.rotation.y = heading;
       u.speed = 18;
     }
+  }
+  function heliOver(S, x, z, y) {
+    var h = CC.police.spawnUnit('heli');
+    if (!h) return null;
+    h.x = x; h.z = z; h.y = y || 55;
+    h.mesh.position.set(x, h.y, z);
+    if (h.cone) h.cone.position.set(S.player.x, 30, S.player.z);
+    return h;
+  }
+  function staticCar(S, key, x, z, heading, colour) {
+    var v = CC.vehicles.make(S.scene, key, x, z, heading, colour);
+    if (v && CC.fx) CC.fx.headlightGlow(v);
+    return v;
   }
   CC.shots = {
     apply: function (name) {
@@ -155,39 +187,59 @@
         car.speed = 24;
         CC.wanted.setHeat(100);
         policeBehind(S, 3, 246, -20, Math.PI);
+        heliOver(S, 252, 18, 55);
+        staticCar(S, 'taxi', 236.5, -58, Math.PI, 0xF2A81D);
+        staticCar(S, 'taxi', 243.5, 28, 0, 0xF2A81D);
+        staticCar(S, 'courier', 236.5, -8, Math.PI, 0xF4E6C8);
+        staticCar(S, 'cutter', 243.5, -44, 0, 0xF2A81D);
+        CC.peds.spawnNear(S.scene, 246, -20, CC.rng.make(SEED + 603));
+        CC.traffic.spawnNear(S.scene, 246, -20, CC.rng.make(SEED + 604));
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
         CC.camera3.shotCam = { pos: [258, 6, -52], look: [240, 2, 8] };
       } else if (name === 'foot') {
-        S.player.x = -158; S.player.z = 98; S.player.heading = 0.6;
+        S.player.x = -150; S.player.z = 92; S.player.heading = 0.6;
         S.player.inVehicle = false;
         S.vehicle = null;
-        if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-158, 0, 98); }
-        var parkedCar = CC.vehicles.make(S.scene, 'sprint', -156, 102, Math.PI / 2, 0xE0433A);
-        CC.vehicles.parked.push({ key: 'sprint', def: CC.config.vehicles.sprint, mesh: parkedCar.mesh, x: -156, z: 102, heading: Math.PI / 2, driver: false, colour: 0xE0433A });
+        if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-150, 0, 92); }
+        var parkedCar = CC.vehicles.make(S.scene, 'sprint', -148, 96, Math.PI / 2, 0xE0433A);
+        CC.vehicles.parked.push({ key: 'sprint', def: CC.config.vehicles.sprint, mesh: parkedCar.mesh, x: -148, z: 96, heading: Math.PI / 2, driver: false, colour: 0xE0433A });
+        staticCar(S, 'taxi', -140, 84, Math.PI / 2, 0xF2A81D);
+        staticCar(S, 'courier', -172, 84, -Math.PI / 2, 0xF4E6C8);
+        CC.peds.spawnNear(S.scene, -150, 92, CC.rng.make(SEED + 605));
+        CC.traffic.spawnNear(S.scene, -150, 92, CC.rng.make(SEED + 606));
         S.health = 100; S.armour = 25;
         S.objective = null;
-        CC.camera3.shotCam = { pos: [-162, 6, 128], look: [-118, 3, 45] };
+        CC.camera3.shotCam = { pos: [-158, 5, 120], look: [-138, 2, 78] };
       } else if (name === 'mission') {
-        var tow = placePlayerCar(S, 'tow', 0, -268, Math.PI, 0xE8A33D);
+        var tow = placePlayerCar(S, 'tow', 0, -380, Math.PI, 0xE8A33D);
         tow.speed = 10;
-        var lorry = CC.vehicles.make(S.scene, 'haul', 0, -300, Math.PI, 0x6B7A8A);
+        var lorry = CC.vehicles.make(S.scene, 'haul', 0, -410, Math.PI, 0x6B7A8A);
         lorry.mission = true; lorry.engineHealth = 100; lorry.speed = 8;
+        staticCar(S, 'cutter', -5, -396, Math.PI, 0xF2A81D);
+        staticCar(S, 'nomad', 5, -402, Math.PI, 0x8A6B4A);
+        var escort = CC.police.spawnUnit('cruiser');
+        if (escort) { escort.x = -4; escort.z = -362; escort.heading = Math.PI; escort.mesh.position.set(-4, 0, -362); escort.mesh.rotation.y = Math.PI; }
         S.mission = { id: 5, name: 'Convoy', lorry: lorry, stages: [], stage: 1 };
-        S.objective = { text: "Disable the lorry's engine", tx: 0, tz: -300, kind: 'mission' };
-        S.objectiveDist = 32;
+        S.objective = { text: "Disable the lorry's engine", tx: 0, tz: -410, kind: 'mission' };
+        S.objectiveDist = 30;
         S.missionProgress = 0.45;
         if (CC.notify) CC.notify.push('Game saved');
-        CC.camera3.shotCam = { pos: [-10, 7, -246], look: [0, 2, -300] };
+        CC.camera3.shotCam = { pos: [-10, 9, -350], look: [0, 2, -410] };
       } else if (name === 'police') {
+        document.body.classList.add('shot-police');
         S.player.x = -200; S.player.z = 220; S.player.heading = 0;
         S.player.inVehicle = false;
         if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-200, 0, 220); }
         CC.wanted.setHeat(180);
+        CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -170; swat.z = 240; swat.mesh.position.set(-170, 0, 240); swat.mesh.rotation.y = Math.PI / 2; }
+        if (swat) { swat.x = -186; swat.z = 236; swat.mesh.position.set(-186, 0, 236); swat.mesh.rotation.y = Math.PI * 0.75; }
+        var flank = CC.police.spawnUnit('cruiser');
+        if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
+        heliOver(S, -210, 245, 55);
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -200, 1.2, 220); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;

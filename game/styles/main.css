@@ -36,6 +36,17 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 #crosshair { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 28px; display: none; }
 #hitmarker { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 24px; color: #E0433A; opacity: 0; }
 .panel-screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(10,25,35,0.28); z-index: 20; }
+.panel-screen.title-screen { background: linear-gradient(180deg, rgba(90,58,122,0.45) 0%, rgba(232,106,160,0.25) 35%, rgba(255,122,74,0.30) 62%, rgba(31,58,95,0.50) 100%); }
+.panel-screen.title-screen .panel { background: rgba(31,58,95,0.92); color: #F4E6C8; }
+.panel-screen.title-screen .panel h1 { color: #FFD166; font-size: 44px; text-shadow: 0 2px 18px rgba(255,122,74,0.8); }
+.panel-screen.title-screen .panel .subtitle { color: #FFB060; }
+.title-sun { position: absolute; top: 9%; right: 14%; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #FFF2B0 0%, #FFB060 55%, rgba(255,122,74,0) 72%); pointer-events: none; }
+.title-skyline { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; pointer-events: none; background: linear-gradient(180deg, transparent, rgba(31,58,95,0.55)); }
+.save-slots { margin-top: 12px; border-top: 2px solid #C8643B; padding-top: 8px; }
+.slot-title { font-weight: 700; color: #FFD166; margin-bottom: 4px; }
+/* Police shot: pause menu docks right so the roadblock stays visible. */
+.shot-police .panel-screen { justify-content: flex-end; padding-right: 28px; background: rgba(10,25,35,0.12); }
+.shot-police .panel { width: 360px; }
 .panel { background: rgba(244,230,200,0.96); color: #1F3A5F; border-radius: 16px; padding: 18px 24px; width: 430px; max-width: 92vw; max-height: 88vh; overflow: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.45); }
 .panel.wide { width: 920px; }
 .panel h1 { margin: 0 0 4px; font-size: 36px; letter-spacing: 2px; color: #C8643B; }

@@ -39,6 +39,8 @@
       if (!S) return;
       S.mode = 'title';
       var hasSave = CC.save ? CC.save.hasSave() : false;
+      var sum = CC.save ? CC.save.summary() : null;
+      var slot1 = sum ? ('Slot 1 — Chapter ' + sum.chapter + ' · ' + sum.cash + ' crowns · ' + (sum.vehicle || 'on foot')) : 'Slot 1 — Empty';
       var list = CC.story.missions.map(function (m) {
         var locked = m.id > S.chapter;
         return '<button data-mission="' + m.id + '"' + (locked ? ' disabled' : '') + '>' +
@@ -48,12 +50,22 @@
         '<h1>CINDER COAST</h1><p class="subtitle">Port Calida — an open world crime game</p>' +
         '<p class="story">Ines Vela came home to Port Calida to settle a debt. Eight chapters, ' +
         'six districts, one freight line to break.</p>' +
-        (hasSave ? '<button id="btn-continue">Continue</button>' : '') +
+        '<div class="save-slots"><div class="slot-title">Save slots</div>' +
+        '<button id="btn-continue"' + (hasSave ? '' : ' disabled') + '>' + slot1 + '</button>' +
+        '<button id="btn-slot2" disabled>Slot 2 — Empty</button>' +
+        '<button id="btn-slot3" disabled>Slot 3 — Empty</button></div>' +
         '<button id="btn-freeroam">Free Roam</button>' +
         '<div class="mission-list">' + list + '</div>' +
         '<button id="btn-activities">Activities</button>' +
         '<button id="btn-options">Options</button>' +
         '<button id="btn-controls">Controls</button>');
+      if (!panel) return;
+      var wrap = panel.parentElement;
+      if (wrap) {
+        wrap.classList.add('title-screen');
+        var sun = document.createElement('div'); sun.className = 'title-sun'; wrap.appendChild(sun);
+        var sky = document.createElement('div'); sky.className = 'title-skyline'; wrap.appendChild(sky);
+      }
       if (!panel) return;
       btn(panel, 'btn-continue', function () {
         var d = CC.save.loadGame();

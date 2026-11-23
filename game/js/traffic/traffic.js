@@ -6,12 +6,20 @@
   var cars = [], spawnBudget = 0;
   function makeCar(scene, rng) {
     var keys = Object.keys(CC.config.vehicles).filter(function (k) {
-      return ['sprint', 'spindle', 'cutter', 'nomad', 'courier', 'quill'].indexOf(k) >= 0;
+      return ['sprint', 'spindle', 'cutter', 'nomad', 'courier', 'quill', 'taxi'].indexOf(k) >= 0;
     });
     var key = rng.pick(keys);
+    if (rng.chance(0.12)) key = 'ardent';
     var def = CC.config.vehicles[key];
     var mesh = CC.geo.carBody(def);
     scene.add(mesh);
+    if (key === 'taxi') {
+      var roof = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.18, 0.5),
+        new THREE.MeshBasicMaterial({ color: 0x2B2B33 }));
+      roof.position.set(0, 1.45, 0);
+      mesh.add(roof);
+    }
+    if (key === 'ardent' && CC.fx) CC.fx.headlightGlow({ mesh: mesh, def: def });
     var road = CC.city.roads[rng.int(0, CC.city.roads.length - 1)];
     var along = rng.range(road.from + 30, road.to - 30);
     var dir = rng.chance(0.5) ? 1 : -1;
@@ -55,7 +63,7 @@
     cars: cars,
     spawnNear: function (scene, px, pz, rng) {
       spawnBudget = 0;
-      while (cars.length < CC.config.caps.traffic && spawnBudget < 2) {
+      while (cars.length < CC.config.caps.traffic && spawnBudget < 4) {
         makeCar(scene, rng); spawnBudget++;
       }
     },

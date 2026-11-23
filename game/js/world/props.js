@@ -17,9 +17,9 @@
         { shape: 'cone', r: 1.2, h: 1.2, x: 0, y: 6.6, z: 0, color: 0x6FAE56 }
       ]);
       var palmMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-      var palms = CC.geo.instanced(palmGeo, palmMat, 90);
+      var palms = CC.geo.instanced(palmGeo, palmMat, 160);
       var m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
-      for (var i = 0; i < 90; i++) {
+      for (var i = 0; i < 160; i++) {
         var road = CC.city.roads[rng.int(0, CC.city.roads.length - 1)];
         var along = rng.range(road.from + 20, road.to - 20);
         if (road.axis === 'ew') p.set(along, 0, road.at + (rng.chance(0.5) ? 9 : -9));

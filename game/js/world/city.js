@@ -46,6 +46,22 @@
         }
         m.receiveShadow = true;
         scene.add(m);
+        // Warm sidewalks on both kerbs, so no road sits on bare sand.
+        var walkMat = new THREE.MeshLambertMaterial({ color: 0xE8C9A0 });
+        [-9.5, 9.5].forEach(function (off) {
+          var w;
+          if (r.axis === 'ew') {
+            w = new THREE.Mesh(new THREE.PlaneGeometry(len, 3), walkMat);
+            w.rotation.x = -Math.PI / 2;
+            w.position.set(mid, 0.08, r.at + off);
+          } else {
+            w = new THREE.Mesh(new THREE.PlaneGeometry(3, len), walkMat);
+            w.rotation.x = -Math.PI / 2;
+            w.position.set(r.at + off, 0.08, mid);
+          }
+          w.receiveShadow = true;
+          scene.add(w);
+        });
         var dashMat = new THREE.MeshBasicMaterial({ color: 0xF4E6C8 });
         var n = Math.floor(len / 12);
         for (var i = 0; i < n; i += 2) {
@@ -88,6 +104,9 @@
         var beam = new THREE.Mesh(new THREE.BoxGeometry(26, 3, 3), towerMat);
         beam.position.set(0, 42, z);
         scene.add(beam);
+        var bsign = CC.geo.textSign('CORVANE BRIDGE', 20, 2.0);
+        bsign.position.set(0, 38.5, z + 1.7);
+        scene.add(bsign);
       });
       var water = new THREE.Mesh(new THREE.PlaneGeometry(120, 40),
         new THREE.MeshLambertMaterial({ color: cfg.palette.water }));
