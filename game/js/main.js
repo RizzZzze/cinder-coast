@@ -266,11 +266,11 @@
         CC.wanted.setHeat(180);
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
-        staticCar(S, 'swat', -172, 218, Math.PI / 2);
+        staticCar(S, 'swat', -200, 204, Math.PI / 2);
         // A SWAT sign on the van's camera-facing side, so the van reads
         // unmistakably and is never mistaken for a civilian truck.
         var swatSign = CC.geo.textSign('SWAT', 4, 0.8);
-        swatSign.position.set(-172, 1.5, 216.7);
+        swatSign.position.set(-200, 1.5, 202.7);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
         var flank = CC.police.spawnUnit('cruiser');
