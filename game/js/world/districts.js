@@ -161,6 +161,14 @@
         ROOFS[(i + 1) % ROOFS.length], { shop: true, roof: i % 3 === 0 ? 'flat' : (i % 3 === 1 ? 'stepped' : 'pyramid'), bothSides: true, balcony: true, awning: 0x2BB3B0, name: names[i] });
     }
     parts.push({ shape: 'box', w: 22, h: 42, d: 18, x: 240, y: 21, z: 80, color: GLASS });
+    // BRIEF-07: a dark window grid plus a mid band on the tower face, so
+    // the tall slab is not one flat blank wall in the chase shot.
+    for (var wy2 = 0; wy2 < 8; wy2++) {
+      for (var wx2 = 0; wx2 < 4; wx2++) {
+        parts.push({ shape: 'box', w: 2.2, h: 1.6, d: 0.12, x: 233.5 + wx2 * 4.3, y: 9 + wy2 * 3.6, z: 89.1, color: 0x1F3A5F });
+      }
+    }
+    parts.push({ shape: 'box', w: 22.4, h: 0.5, d: 0.14, x: 240, y: 22.2, z: 89.1, color: DARK });
     parts.push({ shape: 'cyl', rTop: 9, rBot: 9, h: 42, seg: 10, x: 240, y: 21, z: 92, color: 0xBFE0EA });
     parts.push({ shape: 'box', w: 24, h: 1.0, d: 20, x: 240, y: 42.5, z: 80, color: TERRA });
     parts.push({ shape: 'box', w: 18, h: 2.2, d: 0.14, x: 240, y: 1.3, z: 89.05, color: GLASS });

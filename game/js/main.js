@@ -231,8 +231,9 @@
         car.speed = 24;
         CC.wanted.setHeat(100);
         // BRIEF-07: three cruisers in a true echelon behind the hero car,
-        // spread laterally so none hides on the camera-hero axis.
-        [[232, -12], [240, -4], [258, -10]].forEach(function (cp) {
+        // spread laterally so none hides on the camera-hero axis. The
+        // middle cruiser sits west of the hero, clear of its roofline.
+        [[232, -12], [236, -6], [258, -10]].forEach(function (cp) {
           var u = CC.police.spawnUnit('cruiser');
           if (!u) return;
           u.x = cp[0]; u.z = cp[1]; u.heading = Math.PI;
