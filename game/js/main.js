@@ -120,8 +120,8 @@
       S.shotFxTimer = (S.shotFxTimer || 0) + dt;
       if (S.shotFxTimer > 0.6) {
         S.shotFxTimer = 0;
-        CC.fx.sparks(0, 1.2, -408);
-        CC.fx.muzzle(0, 1.4, -408);
+        CC.fx.sparks(0, 1.2, -398);
+        CC.fx.muzzle(0, 1.4, -398);
       }
     }
     if (CC.quality) CC.quality.update(dt);
@@ -215,18 +215,18 @@
       } else if (name === 'mission') {
         var tow = placePlayerCar(S, 'tow', 0, -380, Math.PI, 0xE8A33D);
         tow.speed = 10;
-        var lorry = CC.vehicles.make(S.scene, 'haul', 0, -410, Math.PI, 0x6B7A8A);
+        var lorry = CC.vehicles.make(S.scene, 'haul', 0, -400, Math.PI, 0x6B7A8A);
         lorry.mission = true; lorry.engineHealth = 100; lorry.speed = 8;
         staticCar(S, 'cutter', -5, -396, Math.PI, 0xF2A81D);
         staticCar(S, 'nomad', 5, -402, Math.PI, 0x8A6B4A);
         var escort = CC.police.spawnUnit('cruiser');
         if (escort) { escort.x = -8; escort.z = -392; escort.heading = Math.PI; escort.mesh.position.set(-8, 0, -392); escort.mesh.rotation.y = Math.PI; }
         S.mission = { id: 5, name: 'Convoy', lorry: lorry, stages: [], stage: 1 };
-        S.objective = { text: "Disable the lorry's engine", tx: 0, tz: -410, kind: 'mission' };
-        S.objectiveDist = 30;
+        S.objective = { text: "Disable the lorry's engine", tx: 0, tz: -400, kind: 'mission' };
+        S.objectiveDist = 20;
         S.missionProgress = 0.45;
         if (CC.notify) CC.notify.push('Game saved');
-        CC.camera3.shotCam = { pos: [-8, 9, -360], look: [0, 2, -410] };
+        CC.camera3.shotCam = { pos: [-8, 9, -360], look: [0, 2, -400] };
       } else if (name === 'police') {
         document.body.classList.add('shot-police');
         S.player.x = -196; S.player.z = 228; S.player.heading = 0;
@@ -236,7 +236,7 @@
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -206; swat.z = 232; swat.mesh.position.set(-206, 0, 232); swat.mesh.rotation.y = -0.9; }
+        if (swat) { swat.x = -210; swat.z = 234; swat.mesh.position.set(-210, 0, 234); swat.mesh.rotation.y = Math.PI / 2; }
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
