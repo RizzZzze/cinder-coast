@@ -158,7 +158,7 @@
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
-        CC.camera3.shotCam = { pos: [228, 5, 75], look: [242, 2, 15] };
+        CC.camera3.shotCam = { pos: [212, 7, 82], look: [242, 2, 12] };
       } else if (name === 'foot') {
         S.player.x = -158; S.player.z = 98; S.player.heading = 0.6;
         S.player.inVehicle = false;

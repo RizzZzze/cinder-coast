@@ -84,7 +84,7 @@
     var S = CC.S;
     if (!S || S.mode !== 'play') return '';
     if (S.vehicle) return 'E: Exit vehicle';
-    if (CC.vehicles && CC.vehicles.nearestParked(S.player.x, S.player.z, 4)) return 'F: Hijack';
+    if (CC.vehicles && CC.vehicles.nearestParked(S.player.x, S.player.z, 5)) return 'F: Hijack';
     if (CC.progression && CC.progression.nearestSafehouse(10)) return 'E: Save at safehouse';
     if (Math.hypot(CC.config.gunShop.x - S.player.x, CC.config.gunShop.z - S.player.z) < 10) return 'E: Gun shop';
     if (Math.hypot(CC.config.garage.x - S.player.x, CC.config.garage.z - S.player.z) < 10) return 'E: Garage';
