@@ -320,22 +320,26 @@
         // broadside, 12 m from the camera, with a big legible SWAT sign on
         // its camera side, clear of the pause menu and the cruiser line.
         staticCar(S, 'swat', -201, 207, Math.PI / 2);
-        var swatSign = CC.geo.textSign('SWAT', 5.5, 1.3);
-        swatSign.position.set(-201, 1.6, 205.55);
+        // BRIEF-07 round 2: the sign sits on the cargo box only (3.4 m),
+        // so the blue cab stays visible at the east end instead of the
+        // sign reading as a billboard across the whole van.
+        var swatSign = CC.geo.textSign('SWAT', 3.4, 1.0);
+        swatSign.position.set(-202.1, 1.35, 205.55);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
         // Foreground ground detail between the camera and the van, so the
         // bottom half of the frame is not an empty expanse: a parked car
         // at the left edge, striped barriers, planters, debris, and an
-        // officer standing beside the van.
-        staticCar(S, 'cutter', -218, 201, Math.PI / 2, 0xE0433A);
-        barrier(S, -216, 206, 0.5);
+        // officer standing beside the van. Positions are inside the new
+        // camera frustum (look -182, 222), not off its west edge.
+        staticCar(S, 'cutter', -207, 204, Math.PI / 2, 0xE0433A);
+        barrier(S, -208, 208, 0.5);
         barrier(S, -196, 201, -0.4);
         var planterA = CC.geo.meshFromParts([
           { shape: 'box', w: 1.6, h: 0.7, d: 1.6, x: 0, y: 0.35, z: 0, color: 0x8A6B4A },
           { shape: 'box', w: 1.4, h: 0.5, d: 1.4, x: 0, y: 0.9, z: 0, color: 0x5E9A4A }
         ]);
-        planterA.position.set(-214, 0, 210);
+        planterA.position.set(-207, 0, 212);
         S.scene.add(planterA);
         var planterB = CC.geo.meshFromParts([
           { shape: 'box', w: 1.6, h: 0.7, d: 1.6, x: 0, y: 0.35, z: 0, color: 0x8A6B4A },
@@ -344,9 +348,9 @@
         planterB.position.set(-197, 0, 199);
         S.scene.add(planterB);
         S.scene.add(CC.geo.meshFromParts([
-          { shape: 'box', w: 0.7, h: 0.4, d: 0.5, x: -210, y: 0.2, z: 203, color: 0x2B2B33 },
-          { shape: 'box', w: 0.5, h: 0.3, d: 0.4, x: -204, y: 0.15, z: 205, color: 0x8A6B4A },
-          { shape: 'box', w: 0.9, h: 0.3, d: 0.6, x: -212, y: 0.15, z: 208, color: 0x2B2B33 },
+          { shape: 'box', w: 0.7, h: 0.4, d: 0.5, x: -204, y: 0.2, z: 205, color: 0x2B2B33 },
+          { shape: 'box', w: 0.5, h: 0.3, d: 0.4, x: -206, y: 0.15, z: 209, color: 0x8A6B4A },
+          { shape: 'box', w: 0.9, h: 0.3, d: 0.6, x: -201, y: 0.15, z: 202, color: 0x2B2B33 },
           { shape: 'box', w: 0.4, h: 0.25, d: 0.4, x: -199, y: 0.12, z: 204, color: 0x8A6B4A }
         ]));
         var vanOfficer = CC.geo.personMesh(0x1F3A5F, 0xE8B88A);
@@ -359,7 +363,7 @@
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-209, 3.2, 198], look: [-186, 2, 222] };
+        CC.camera3.shotCam = { pos: [-209, 3.2, 198], look: [-182, 2, 222] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }
