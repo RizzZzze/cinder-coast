@@ -1,0 +1,84 @@
+// Cinder Coast districts (Stage 2): the five remaining districts, each built
+// as merged-geometry blocks so a whole district is a handful of draw calls.
+// Every part is grounded: roofs sit on walls, posts reach the ground, awnings
+// sit on posts. Palette stays sandstone / stucco / terracotta / turquoise.
+(function () {
+  var CC = window.CinderCoast;
+  function roofR(w, d) { return Math.sqrt(w * w + d * d) / 2; }
+  function building(parts, x, z, w, d, h, color, roofH, roofColor) {
+    parts.push({ shape: 'box', w: w, h: h, d: d, x: x, y: h / 2, z: z, color: color });
+    // Parapet cap, slightly wider than the walls, on top of the walls.
+    parts.push({ shape: 'box', w: w + 0.4, h: 0.5, d: d + 0.4, x: x, y: h + 0.25, z: z, color: 0xF4E6C8 });
+    if (roofH > 0) {
+      parts.push({ shape: 'cone', r: roofR(w, d), h: roofH, seg: 4, x: x, y: h + 0.5 + roofH / 2, z: z, ry: Math.PI / 4, color: roofColor || 0xC8643B });
+      parts.push({ shape: 'box', w: 0.9, h: 2.2, d: 0.9, x: x + w * 0.25, y: h + roofH * 0.6, z: z + d * 0.15, color: 0x8A5A40 });
+    }
+    // Window grid on the front and back faces, storefront glass at street level.
+    var rows = Math.max(1, Math.floor((h - 3) / 3.2));
+    for (var r = 0; r < rows; r++) {
+      var wy = 2.6 + r * 3.2;
+      if (wy > h - 1) break;
+      var cols = Math.max(1, Math.floor((w - 4) / 3.4));
+      for (var c = 0; c < cols; c++) {
+        var wx = x - w / 2 + 2.4 + c * 3.4;
+        parts.push({ shape: 'box', w: 1.3, h: 1.7, d: 0.12, x: wx, y: wy, z: z + d / 2 + 0.03, color: 0x2E4A5E });
+        parts.push({ shape: 'box', w: 1.3, h: 1.7, d: 0.12, x: wx, y: wy, z: z - d / 2 - 0.03, color: 0x2E4A5E });
+      }
+    }
+    parts.push({ shape: 'box', w: Math.min(w * 0.55, 7), h: 2.4, d: 0.12, x: x, y: 1.5, z: z + d / 2 + 0.03, color: 0x1E3A4A });
+    parts.push({ shape: 'box', w: Math.min(w * 0.6, 7), h: 0.18, d: 1.8, x: x, y: 3.1, z: z + d / 2 + 0.95, rx: -0.22, color: 0xF2A81D });
+    CC.spatial.addBox(x, z, w / 2, d / 2);
+  }
+  function stall(parts, x, z, color) {
+    parts.push({ shape: 'box', w: 4.4, h: 1.1, d: 2.4, x: x, y: 0.55, z: z, color: 0x8A6B4A });
+    parts.push({ shape: 'box', w: 5, h: 0.3, d: 4, x: x, y: 2.6, z: z, color: color });
+    [[-2.1, -1.7], [2.1, -1.7], [-2.1, 1.7], [2.1, 1.7]].forEach(function (pc) {
+      parts.push({ shape: 'box', w: 0.14, h: 1.5, d: 0.14, x: x + pc[0], y: 1.8, z: z + pc[1], color: 0x5A4632 });
+    });
+    CC.spatial.addBox(x, z, 2.4, 1.6);
+  }
+  function flush(parts, group) {
+    if (!parts.length) return;
+    var mesh = CC.geo.meshFromParts(parts);
+    mesh.receiveShadow = true;
+    group.add(mesh);
+  }
+  CC.districts = {
+    funicular: null,
+    build: function (group, seed) {
+      CC.districts.buildMercado(group, seed);
+    },
+    buildMercado: function (group, seed) {
+      var rng = CC.rng.make(seed + 700);
+      var parts = [];
+      var palette = [0xE9C98F, 0xF4E6C8, 0xD9B380, 0xE8D9B0];
+      // Market-lane buildings around the Mercado centre (-160, -40).
+      var plots = [
+        [-196, -72, 18, 16, 11], [-168, -76, 16, 14, 14], [-140, -74, 20, 15, 9],
+        [-196, -16, 17, 15, 13], [-140, -14, 19, 16, 10], [-200, -44, 15, 13, 8],
+        [-132, -44, 14, 12, 12], [-168, -8, 16, 14, 7], [-184, -40, 12, 10, 9]
+      ];
+      plots.forEach(function (p, i) {
+        building(parts, p[0], p[1], p[2], p[3], p[4], palette[i % palette.length], rng.range(2.5, 4.5));
+      });
+      // Arcades: a colonnade lane at z -56..-24, posts from the ground to a
+      // flat slab roof, so the arcade reads as a covered walk, never floating.
+      for (var ax = -192; ax <= -128; ax += 8) {
+        [-56, -24].forEach(function (az) {
+          parts.push({ shape: 'box', w: 0.6, h: 4.4, d: 0.6, x: ax, y: 2.2, z: az, color: 0xF4E6C8 });
+        });
+      }
+      parts.push({ shape: 'box', w: 68, h: 0.5, d: 36, x: -160, y: 4.65, z: -40, color: 0xC8643B });
+      // Covered food hall at the west end: low walls, columns, pyramid roof.
+      parts.push({ shape: 'box', w: 26, h: 5, d: 18, x: -212, y: 2.5, z: -64, color: 0xF4E6C8 });
+      parts.push({ shape: 'cone', r: roofR(26, 18), h: 5, seg: 4, x: -212, y: 5.5 + 2.5, z: -64, ry: Math.PI / 4, color: 0xC8643B });
+      CC.spatial.addBox(-212, -64, 13, 9);
+      // Awning stalls down the two market lanes.
+      var cols = [0xC8643B, 0xF2A81D, 0x2BB3B0, 0xE0433A];
+      for (var s = 0; s < 10; s++) {
+        stall(parts, -188 + s * 7, -48 + (s % 2) * 14, cols[s % 4]);
+      }
+      flush(parts, group);
+    }
+  };
+})();

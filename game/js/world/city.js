@@ -11,6 +11,11 @@
     for (var x = -240; x <= 240; x += every) lines.push({ axis: 'ns', at: x, from: -half, to: half });
     lines.push({ axis: 'ew', at: 280, from: -320, to: 320 });
     lines.push({ axis: 'ns', at: 180, from: -560, to: 280 });
+    // Low ring road at the edge of the world, linking every district.
+    lines.push({ axis: 'ew', at: -320, from: -320, to: 320 });
+    lines.push({ axis: 'ns', at: -320, from: -320, to: 280 });
+    lines.push({ axis: 'ns', at: 320, from: -320, to: 280 });
+    lines.push({ axis: 'ew', at: -560, from: -320, to: 320 });
     return lines;
   }
   function nearestRoadPoint(x, z) {
@@ -224,6 +229,7 @@
         chim.instanceMatrix.needsUpdate = true; group.add(chim);
       })();
       CC.city.buildings = archetypes;
+      if (CC.districts) CC.districts.build(group, seed);
       CC.city.buildLandmarks(group);
       scene.add(group);
       CC.city.group = group;
