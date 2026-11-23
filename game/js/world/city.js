@@ -50,7 +50,7 @@
         }
         // Plaza slabs at the market and the quay, the two on-foot areas,
         // plus paved shoulders flanking the bridge deck approach.
-        [[-150, 92, 46, 30], [-120, 108, 30, 18], [-210, 244, 44, 28], [-180, 210, 26, 16], [-20, -360, 14, 44], [20, -360, 14, 44]].forEach(function (pl) {
+        [[-150, 92, 46, 30], [-120, 108, 30, 18], [-210, 244, 44, 28], [-180, 210, 26, 16], [-20, -360, 14, 44], [20, -360, 14, 44], [-45, -350, 24, 30], [45, -350, 24, 30]].forEach(function (pl) {
           pparts.push({ shape: 'box', w: pl[2], h: 0.04, d: pl[3], x: pl[0], y: 0.02, z: pl[1], color: tones[Math.floor(prng.range(0, tones.length))] });
         });
         // Crosswalks at every central junction: white stripes across both

@@ -201,7 +201,16 @@
         var car = placePlayerCar(S, 'spindle', 246, -20, Math.PI, 0x2BB3B0);
         car.speed = 24;
         CC.wanted.setHeat(100);
-        policeBehind(S, 3, 246, -20, Math.PI);
+        // Three cruisers in an echelon flanking the hero car, none hidden
+        // directly behind it from the chase camera.
+        [[258, -18], [252, -12], [234, -18]].forEach(function (cp) {
+          var u = CC.police.spawnUnit('cruiser');
+          if (!u) return;
+          u.x = cp[0]; u.z = cp[1]; u.heading = Math.PI;
+          u.mesh.position.set(cp[0], 0, cp[1]);
+          u.mesh.rotation.y = Math.PI;
+          u.speed = 18;
+        });
         heliOver(S, 252, 18, 55);
         staticCar(S, 'taxi', 236.5, -58, Math.PI, 0xF2A81D);
         staticCar(S, 'taxi', 236, 20, 0, 0xF2A81D);
@@ -214,7 +223,7 @@
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
-        CC.camera3.shotCam = { pos: [260, 7, -56], look: [241, 2, 4] };
+        CC.camera3.shotCam = { pos: [252, 7, -50], look: [243, 2, 2] };
       } else if (name === 'foot') {
         S.player.x = -150; S.player.z = 92; S.player.heading = 0.6;
         S.player.inVehicle = false;
@@ -231,7 +240,7 @@
         CC.traffic.spawnNear(S.scene, -150, 92, CC.rng.make(S.seed + 606));
         S.health = 100; S.armour = 25;
         S.objective = null;
-        CC.camera3.shotCam = { pos: [-152, 6, 128], look: [-128, 2, 80] };
+        CC.camera3.shotCam = { pos: [-152, 6, 118], look: [-128, 2, 80] };
       } else if (name === 'mission') {
         var tow = placePlayerCar(S, 'tow', 0, -380, Math.PI, 0xE8A33D);
         tow.speed = 10;
@@ -258,12 +267,12 @@
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -180; swat.z = 240; swat.mesh.position.set(-180, 0, 240); swat.mesh.rotation.y = Math.PI / 2; }
-        staticCar(S, 'swat', -187, 222, Math.PI / 2);
+        if (swat) { swat.x = -170; swat.z = 240; swat.mesh.position.set(-170, 0, 240); swat.mesh.rotation.y = Math.PI / 2; }
+        staticCar(S, 'swat', -178, 226, Math.PI / 2);
         // A SWAT sign on the van's camera-facing side, so the van reads
         // unmistakably and is never mistaken for a civilian truck.
         var swatSign = CC.geo.textSign('SWAT', 4, 0.8);
-        swatSign.position.set(-187, 1.5, 220.7);
+        swatSign.position.set(-178, 1.5, 224.7);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
         staticCar(S, 'quill', -168, 231.5, Math.PI / 2, 0x7FA8C9);
