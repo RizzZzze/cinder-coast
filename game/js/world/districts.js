@@ -25,6 +25,12 @@
         parts.push({ shape: 'box', w: 1.3, h: 1.7, d: 0.12, x: wx, y: wy, z: z + d / 2 + 0.03, color: 0x2E4A5E });
         parts.push({ shape: 'box', w: 1.3, h: 1.7, d: 0.12, x: wx, y: wy, z: z - d / 2 - 0.03, color: 0x2E4A5E });
       }
+      var colsX = Math.max(1, Math.floor((d - 4) / 3.4));
+      for (var cx2 = 0; cx2 < colsX; cx2++) {
+        var wz = z - d / 2 + 2.4 + cx2 * 3.4;
+        parts.push({ shape: 'box', w: 0.12, h: 1.7, d: 1.3, x: x + w / 2 + 0.03, y: wy, z: wz, color: 0x2E4A5E });
+        parts.push({ shape: 'box', w: 0.12, h: 1.7, d: 1.3, x: x - w / 2 - 0.03, y: wy, z: wz, color: 0x2E4A5E });
+      }
     }
     parts.push({ shape: 'box', w: Math.min(w * 0.55, 7), h: 2.4, d: 0.12, x: x, y: by + 1.5, z: z + d / 2 + 0.03, color: 0x1E3A4A });
     parts.push({ shape: 'box', w: Math.min(w * 0.6, 7), h: 0.18, d: 1.8, x: x, y: by + 3.1, z: z + d / 2 + 0.95, rx: -0.22, color: 0xF2A81D });

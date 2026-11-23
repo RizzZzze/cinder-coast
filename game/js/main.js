@@ -103,7 +103,10 @@
     var S = CC.S;
     S.shotMode = true;
     if (name === 'chase') {
-      var car = CC.vehicles.make(S.scene, 'spindle', 180, 60, Math.PI, 0xC0392B);
+      // Shot 1, the cover: a chase down the Sunfield boulevard. Ines in a
+      // Mistral Spindle, three Calida Ardent cruisers behind, lights on.
+      // The boulevard road runs at x 320, clear of the hotel row.
+      var car = CC.vehicles.make(S.scene, 'spindle', 320, 60, Math.PI, 0xC0392B);
       car.speed = 25;
       S.vehicle = car; S.player.inVehicle = true; S.player.x = car.x; S.player.z = car.z;
       S.heat = 100; S.stars = 3;
@@ -111,79 +114,114 @@
       CC.hud.setObjective('Lose the Ardents and reach the Glasswing');
       CC.notify.push('Heat +15: vehicle reported');
       var rng = CC.rng.make(seed + 9);
-      var px = [172, 188, 180];
+      var px = [308, 320, 330];
       for (var i = 0; i < 3; i++) {
         var m = CC.geo.carBody(CC.config.vehicles.ardent);
-        m.position.set(px[i], 0, 78 + i * 14);
+        m.position.set(px[i], 0, 74 + i * 13);
         m.rotation.y = Math.PI;
         S.scene.add(m);
-        S.police.push({ kind: 'cruiser', mesh: m, x: px[i], z: 78 + i * 14, heading: Math.PI, speed: 24, health: 100, state: 'pursuit', shootTimer: 0 });
+        S.police.push({ kind: 'cruiser', mesh: m, x: px[i], z: 74 + i * 13, heading: Math.PI, speed: 24, health: 100, state: 'pursuit', shootTimer: 0 });
       }
-      CC.camera3.shotCam = { pos: [172, 5.5, 32], look: [181, 1.5, 62] };
+      CC.camera3.shotCam = { pos: [312, 5.5, 30], look: [321, 1.5, 62] };
       CC.camera3.setYaw(Math.PI);
     } else if (name === 'foot') {
-      S.player.x = -120; S.player.z = 110; S.player.heading = Math.PI;
+      // Shot 2, the city on foot: Ines walks through Old Mercado past the
+      // awning stalls and a crowd, traffic on the cross street, Halo Tower
+      // rising above the rooftops in the distance.
+      S.player.x = -150; S.player.z = 6; S.player.heading = 2.45;
       S.player.inVehicle = false; S.vehicle = null;
       if (S.player.mesh) S.player.mesh.position.set(S.player.x, 0, S.player.z);
-      var v = CC.vehicles.make(S.scene, 'sprint', -114, 96, Math.PI / 2, 0x7FA8C9);
+      var v = CC.vehicles.make(S.scene, 'sprint', -144, -2, Math.PI / 2, 0x7FA8C9);
       S.nearParkedPrompt = v;
       S.waypoint = { x: 0, z: -200, label: 'Halo Tower' };
-      CC.hud.setObjective('Explore Saltmarsh Quay');
+      CC.hud.setObjective('Explore Old Mercado');
       CC.hud.showPrompt('F: Hijack');
-      CC.camera3.setYaw(Math.PI);
+      // Staged traffic on the cross street (z 0 road).
+      [[-120, 2, 'sprint'], [-100, -2, 'cutter']].forEach(function (tc) {
+        var tm = CC.geo.carBody(CC.config.vehicles[tc[2]]);
+        tm.position.set(tc[0], 0, tc[1]);
+        tm.rotation.y = tc[0] < -150 ? -Math.PI / 2 : Math.PI / 2;
+        S.scene.add(tm);
+      });
+      // Fixed camera: Ines crossing the street in the foreground, stalls,
+      // the Sprint and the Halo Tower behind her.
+      CC.camera3.shotCam = { pos: [-186, 6, 20], look: [-130, 6, -30] };
+      CC.camera3.setYaw(2.45);
       var rng2 = CC.rng.make(seed + 5);
       CC.peds.spawnNear(S.scene, S.player.x, S.player.z, rng2);
       for (var pi = 0; pi < 8; pi++) {
         var pm = CC.geo.personMesh([0xC8643B, 0x2BB3B0, 0xF2A81D, 0x5E9A4A][pi % 4], 0xE8B88A);
-        var pxx = -132 + pi * 4, pzz = 96 + (pi % 3) * 5;
+        var pxx = -170 + pi * 4, pzz = 0 + (pi % 3) * 3;
         pm.position.set(pxx, 0, pzz);
         S.scene.add(pm);
         CC.peds.list.push({ mesh: pm, x: pxx, z: pzz, road: CC.city.roads[4], along: pxx, dir: 1, speed: 1.1, state: 'walk', lookTimer: 0, fleeX: 0, fleeZ: 0, bob: pi, tipped: false });
       }
     } else if (name === 'mission') {
-      var tow = CC.vehicles.make(S.scene, 'tow', 180, -140, Math.PI, 0xE8A33D);
+      // Shot 3, the mission set piece: Mission 5 Convoy on the Corvane
+      // Bridge approach. Ines in the Tidewell Tow close behind a Brasswater
+      // Haul lorry. Staged on flat ground south of the bridge ramp, with
+      // the ramp and deck rising behind the lorry.
+      var tow = CC.vehicles.make(S.scene, 'tow', 180, -230, Math.PI, 0xE8A33D);
       tow.speed = 14;
-      var hooked = CC.vehicles.make(S.scene, 'sprint', 180, -132, Math.PI, 0x7FA8C9);
-      tow.towed = hooked;
       S.vehicle = tow; S.player.inVehicle = true; S.player.x = tow.x; S.player.z = tow.z;
-      var haul = CC.vehicles.make(S.scene, 'haul', 180, -168, Math.PI, 0x8A8F98);
+      var haul = CC.vehicles.make(S.scene, 'haul', 180, -255, Math.PI, 0x8A8F98);
       haul.speed = 12;
       S.missionHaul = haul;
-      S.mission = { id: 1, name: 'Wrong Tow', stage: 2, timer: 0 };
-      S.waypoint = { x: 180, z: -280, label: 'Mercado garage' };
-      CC.hud.setObjective('Tow the Vesper to the Mercado garage');
-      CC.hud.setProgress(0.55);
+      S.missionHaulEngine = 55;
+      S.mission = { id: 5, name: 'Convoy', stage: 1, timer: 300 };
+      S.waypoint = { x: 180, z: -255, label: 'Brasswater Haul' };
+      CC.hud.setObjective('Disable the lorry engine');
+      CC.hud.setProgress(0.45);
       CC.notify.push('Game saved');
-      // Fixed shot camera: the chase camera sits against the east-side
-      // building on the bridge approach, so pin the camera west and up.
-      CC.camera3.shotCam = { pos: [166, 7, -116], look: [181, 1.5, -168] };
+      // Bridge traffic moving on the bridge lanes.
+      [[172, -235, 'sprint'], [188, -250, 'cutter']].forEach(function (tc) {
+        var tm = CC.geo.carBody(CC.config.vehicles[tc[2]]);
+        tm.position.set(tc[0], 0, tc[1]);
+        tm.rotation.y = Math.PI;
+        S.scene.add(tm);
+      });
+      CC.camera3.shotCam = { pos: [196, 9, -215], look: [180, 1.5, -245] };
       CC.camera3.setYaw(Math.PI);
     } else if (name === 'police') {
+      // Shot 4, police responding: a 4-star roadblock at a Quay junction,
+      // cruisers angled across the road, foot officers firing from behind
+      // barriers, a SWAT van arriving with its lights on. Pause menu open.
       var pc = CC.vehicles.make(S.scene, 'spindle', 0, 205, Math.PI, 0xC0392B);
       pc.speed = 0;
       S.vehicle = pc; S.player.inVehicle = true; S.player.x = pc.x; S.player.z = pc.z;
-      S.heat = 100; S.stars = 3;
+      S.heat = 180; S.stars = 4;
       S.waypoint = { x: 0, z: 160, label: 'Roadblock' };
       CC.hud.setObjective('Break through the roadblock');
       var rb = { x: 0, z: 160, units: [] };
       S.roadblock = rb;
       for (var i = 0; i < 3; i++) {
         var cm = CC.geo.carBody(CC.config.vehicles.ardent);
-        cm.position.set(-10 + i * 10, 0, 160);
+        cm.position.set(-24 + i * 24, 0, 160);
         cm.rotation.y = Math.PI / 2 + (i - 1) * 0.45;
         S.scene.add(cm);
-        rb.units.push({ kind: 'cruiser', mesh: cm, x: -10 + i * 10, z: 160, heading: 0, speed: 0, health: 100, state: 'block', shootTimer: 0 });
+        rb.units.push({ kind: 'cruiser', mesh: cm, x: -24 + i * 24, z: 160, heading: 0, speed: 0, health: 100, state: 'block', shootTimer: 0 });
       }
       for (var j = 0; j < 4; j++) {
         var off = CC.geo.personMesh(0x1F3A5F, 0xE8B88A);
-        off.position.set(-14 + j * 9, 0, 168);
+        off.position.set(-30 + j * 20, 0, 168);
         S.scene.add(off);
-        rb.units.push({ kind: 'foot', mesh: off, x: -14 + j * 9, z: 168, heading: 0, speed: 0, health: 60, state: 'block', shootTimer: j * 0.3 });
+        rb.units.push({ kind: 'foot', mesh: off, x: -30 + j * 20, z: 168, heading: 0, speed: 0, health: 60, state: 'block', shootTimer: j * 0.3 });
       }
       for (var k = 0; k < 3; k++) {
         var pm = CC.geo.carBody(CC.config.vehicles.ardent);
+        pm.position.set(-20 + k * 20, 0, 190);
+        pm.rotation.y = Math.PI;
         S.scene.add(pm);
         S.police.push({ kind: 'cruiser', mesh: pm, x: -20 + k * 20, z: 190, heading: Math.PI, speed: 0, health: 100, state: 'pursuit', shootTimer: 0 });
+      }
+      // SWAT van arriving from the east with its lights on, staged clear
+      // of the pause panel so it reads at a glance.
+      var swat = CC.vehicles.make(S.scene, 'swatvan', 18, 182, Math.PI / 2, 0x1F3A5F);
+      S.police.push({ kind: 'swat', mesh: swat.mesh, x: 18, z: 182, heading: Math.PI / 2, speed: 0, health: 160, state: 'pursuit', shootTimer: 0 });
+      // Muzzle flashes and tracers from the roadblock officers.
+      for (var f = 0; f < 4; f++) {
+        CC.fx.muzzle(-30 + f * 20, 168, 0);
+        CC.fx.tracer(-30 + f * 20, 168, 0, 200);
       }
       S.mode = 'pause';
       CC.menu.hideAll();
@@ -210,11 +248,8 @@
       if (S.shotMode) {
         if (shotName === 'chase' && S.vehicle) S.vehicle.speed = 25;
         if (shotName === 'mission' && S.vehicle) S.vehicle.speed = 14;
-        if (shotName === 'mission' && S.missionHaul) {
-          S.missionHaul.z -= 12 * dt;
-          S.missionHaul.mesh.position.set(S.missionHaul.x, 0, S.missionHaul.z);
-          S.missionHaul.mesh.rotation.y = Math.PI;
-        }
+        // The mission-shot haul stays staged: in real play
+        // CC.missions.update drives it across the bridge.
         if (shotName === 'foot') CC.hud.showPrompt('F: Hijack');
       } else {
         if (input.enter && S.vehicle) CC.ownership.exitVehicle();
@@ -285,6 +320,12 @@
       CC.minimap.draw();
       CC.hud.update();
       CC.camera3.update(0.016, camera, false);
+      // Keep a muzzle flash and tracer live at the screenshot instant:
+      // the one-off flashes from staging have faded by then.
+      var fxOx = [-30, -10, 10, 30][frameCount % 4];
+      CC.fx.muzzle(fxOx, 168, 0);
+      CC.fx.tracer(fxOx, 168, 0, 200);
+      CC.fx.update(0.016);
     }
     if (frameCount === 90) window.__shotReady = true;
     renderer.render(scene, camera);
