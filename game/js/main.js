@@ -151,14 +151,14 @@
       S.cash = 2450;
       S.standing = 42;
       if (name === 'chase') {
-        var car = placePlayerCar(S, 'spindle', 240, 40, Math.PI, 0x2BB3B0);
+        var car = placePlayerCar(S, 'spindle', 246, -20, Math.PI, 0x2BB3B0);
         car.speed = 24;
         CC.wanted.setHeat(100);
-        policeBehind(S, 3, 240, 40, Math.PI);
+        policeBehind(S, 3, 246, -20, Math.PI);
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
-        CC.camera3.shotCam = { pos: [212, 7, 82], look: [242, 2, 12] };
+        CC.camera3.shotCam = { pos: [258, 6, -52], look: [240, 2, 8] };
       } else if (name === 'foot') {
         S.player.x = -158; S.player.z = 98; S.player.heading = 0.6;
         S.player.inVehicle = false;
