@@ -266,23 +266,21 @@
         CC.wanted.setHeat(180);
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
-        var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -170; swat.z = 240; swat.mesh.position.set(-170, 0, 240); swat.mesh.rotation.y = Math.PI / 2; }
-        staticCar(S, 'swat', -178, 226, Math.PI / 2);
+        staticCar(S, 'swat', -172, 218, Math.PI / 2);
         // A SWAT sign on the van's camera-facing side, so the van reads
         // unmistakably and is never mistaken for a civilian truck.
         var swatSign = CC.geo.textSign('SWAT', 4, 0.8);
-        swatSign.position.set(-178, 1.5, 224.7);
+        swatSign.position.set(-172, 1.5, 216.7);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
         staticCar(S, 'quill', -168, 231.5, Math.PI / 2, 0x7FA8C9);
         var flank = CC.police.spawnUnit('cruiser');
-        if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
+        if (flank) { flank.x = -188; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-188, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-232, 8, 196], look: [-186, 1, 240] };
+        CC.camera3.shotCam = { pos: [-226, 7, 202], look: [-186, 1, 238] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }
