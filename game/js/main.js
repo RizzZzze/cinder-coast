@@ -158,17 +158,17 @@
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
-        CC.camera3.shotCam = { pos: [256, 6, 8], look: [238, 2, 52] };
+        CC.camera3.shotCam = { pos: [228, 5, 75], look: [242, 2, 15] };
       } else if (name === 'foot') {
-        S.player.x = -160; S.player.z = 96; S.player.heading = 0.6;
+        S.player.x = -158; S.player.z = 98; S.player.heading = 0.6;
         S.player.inVehicle = false;
         S.vehicle = null;
-        if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-160, 0, 96); }
-        var parkedCar = CC.vehicles.make(S.scene, 'sprint', -152, 104, Math.PI / 2, 0xE0433A);
-        CC.vehicles.parked.push({ key: 'sprint', def: CC.config.vehicles.sprint, mesh: parkedCar.mesh, x: -152, z: 104, heading: Math.PI / 2, driver: false, colour: 0xE0433A });
+        if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-158, 0, 98); }
+        var parkedCar = CC.vehicles.make(S.scene, 'sprint', -156, 102, Math.PI / 2, 0xE0433A);
+        CC.vehicles.parked.push({ key: 'sprint', def: CC.config.vehicles.sprint, mesh: parkedCar.mesh, x: -156, z: 102, heading: Math.PI / 2, driver: false, colour: 0xE0433A });
         S.health = 100; S.armour = 25;
         S.objective = null;
-        CC.camera3.shotCam = { pos: [-172, 5, 114], look: [-110, 4, 30] };
+        CC.camera3.shotCam = { pos: [-162, 6, 128], look: [-118, 3, 45] };
       } else if (name === 'mission') {
         var tow = placePlayerCar(S, 'tow', 0, -268, Math.PI, 0xE8A33D);
         tow.speed = 10;
@@ -191,7 +191,7 @@
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -200, 1.2, 220); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-214, 8, 196], look: [-192, 1, 240] };
+        CC.camera3.shotCam = { pos: [-222, 6, 206], look: [-188, 1, 238] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }

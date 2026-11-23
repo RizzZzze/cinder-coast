@@ -67,32 +67,32 @@
         m.position.set(rp.x, 0.07, rp.z);
         scene.add(m);
       });
-      var deck = new THREE.Mesh(new THREE.BoxGeometry(24, 1.2, 320),
+      var deck = new THREE.Mesh(new THREE.BoxGeometry(24, 0.5, 320),
         new THREE.MeshLambertMaterial({ color: 0x8A8F98 }));
-      deck.position.set(0, 2.2, -320);
+      deck.position.set(0, 0.25, -320);
       deck.receiveShadow = true;
       scene.add(deck);
       var deckTop = new THREE.Mesh(new THREE.PlaneGeometry(22, 320),
         new THREE.MeshLambertMaterial({ color: cfg.palette.asphalt }));
       deckTop.rotation.x = -Math.PI / 2;
-      deckTop.position.set(0, 2.85, -320);
+      deckTop.position.set(0, 0.51, -320);
       scene.add(deckTop);
       var towerMat = new THREE.MeshLambertMaterial({ color: 0xF4E6C8 });
       [-460, -180].forEach(function (z) {
         var t = new THREE.Mesh(new THREE.BoxGeometry(3, 42, 3), towerMat);
-        t.position.set(-11, 23, z);
+        t.position.set(-11, 21, z);
         scene.add(t);
         var t2 = new THREE.Mesh(new THREE.BoxGeometry(3, 42, 3), towerMat);
-        t2.position.set(11, 23, z);
+        t2.position.set(11, 21, z);
         scene.add(t2);
         var beam = new THREE.Mesh(new THREE.BoxGeometry(26, 3, 3), towerMat);
         beam.position.set(0, 42, z);
         scene.add(beam);
       });
-      var water = new THREE.Mesh(new THREE.PlaneGeometry(300, 160),
+      var water = new THREE.Mesh(new THREE.PlaneGeometry(120, 40),
         new THREE.MeshLambertMaterial({ color: cfg.palette.water }));
       water.rotation.x = -Math.PI / 2;
-      water.position.set(0, 0.4, -320);
+      water.position.set(0, 0.15, -320);
       scene.add(water);
       CC.districts.buildAll(scene, seed);
       if (CC.props) CC.props.build(scene, seed);
