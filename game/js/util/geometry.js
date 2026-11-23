@@ -188,7 +188,7 @@
       cx.fillText(label, 256, 52);
       var tex = new THREE.CanvasTexture(cv);
       var mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
-        new THREE.MeshBasicMaterial({ map: tex }));
+        new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
       mesh.userData.isSign = true;
       return mesh;
     }

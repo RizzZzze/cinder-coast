@@ -62,11 +62,11 @@
         bar.position.set(-40 + b * 4, 0.5, 240); scene.add(bar);
       }
       var sign = CC.geo.textSign('PORT CALIDA', 10, 1.8);
-      sign.position.set(-200, 10, 232); scene.add(sign);
+      sign.position.set(-232, 10, 258); scene.add(sign);
       // Two posts carry the sign down to the ground, it no longer floats.
-      [-203.5, -196.5].forEach(function (sx) {
+      [-235.5, -228.5].forEach(function (sx) {
         var spost = new THREE.Mesh(new THREE.BoxGeometry(0.3, 8.5, 0.3), postMat);
-        spost.position.set(sx, 4.25, 232); scene.add(spost);
+        spost.position.set(sx, 4.25, 258); scene.add(spost);
       });
       // Ground-level street detail: planters, crates, bollards, benches.
       (function () {

@@ -166,7 +166,7 @@
     if (!h) return null;
     h.x = x; h.z = z; h.y = y || 55;
     h.mesh.position.set(x, h.y, z);
-    if (h.cone) h.cone.position.set(S.player.x, 30, S.player.z);
+    if (h.cone) { h.cone.position.set(S.player.x, h.y / 2, S.player.z); h.cone.scale.y = h.y / 55; }
     return h;
   }
   function staticCar(S, key, x, z, heading, colour) {
@@ -226,7 +226,7 @@
         S.objectiveDist = 30;
         S.missionProgress = 0.45;
         if (CC.notify) CC.notify.push('Game saved');
-        CC.camera3.shotCam = { pos: [-12, 12, -342], look: [0, 2, -410] };
+        CC.camera3.shotCam = { pos: [-8, 9, -360], look: [0, 2, -410] };
       } else if (name === 'police') {
         document.body.classList.add('shot-police');
         S.player.x = -196; S.player.z = 228; S.player.heading = 0;
@@ -236,7 +236,7 @@
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -180; swat.z = 240; swat.mesh.position.set(-180, 0, 240); swat.mesh.rotation.y = -0.9; }
+        if (swat) { swat.x = -206; swat.z = 232; swat.mesh.position.set(-206, 0, 232); swat.mesh.rotation.y = -0.9; }
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);

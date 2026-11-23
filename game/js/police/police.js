@@ -36,9 +36,9 @@
         ]);
         mesh.position.set(p[0], 60, p[1]);
         S.scene.add(mesh);
-        var cone = new THREE.Mesh(new THREE.ConeGeometry(9, 60, 12, 1, true),
-          new THREE.MeshBasicMaterial({ color: 0xFFF2B0, transparent: true, opacity: 0.14, side: THREE.DoubleSide }));
-        cone.position.set(p[0], 30, p[1]);
+        var cone = new THREE.Mesh(new THREE.ConeGeometry(6, 55, 12, 1, true),
+          new THREE.MeshBasicMaterial({ color: 0xFFF2B0, transparent: true, opacity: 0.08, side: THREE.DoubleSide }));
+        cone.position.set(p[0], 27, p[1]);
         S.scene.add(cone);
         unit = { kind: 'heli', x: p[0], z: p[1], y: 60, heading: 0, speed: 0, mesh: mesh, cone: cone, angle: 0, shootTimer: 0, health: 200 };
       } else {
