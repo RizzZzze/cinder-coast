@@ -97,6 +97,15 @@
       }
     }
     if (CC.fx) CC.fx.update(dt);
+    if (S.shotMode && CC.fx && S.police) CC.fx.policeLights(S.police, S.time);
+    if (S.shotMode && S.shot === 'police' && CC.fx) {
+      S.shotFxTimer = (S.shotFxTimer || 0) + dt;
+      if (S.shotFxTimer > 0.4) {
+        S.shotFxTimer = 0;
+        CC.fx.tracer(-196, 1.4, 236, -200, 1.2, 220);
+        CC.fx.muzzle(-196, 1.4, 236);
+      }
+    }
     if (CC.quality) CC.quality.update(dt);
     if (CC.chunks) CC.chunks.update(dt);
     if (CC.sky) CC.sky.follow(S.player.x, S.player.z);
@@ -155,8 +164,8 @@
         S.player.inVehicle = false;
         S.vehicle = null;
         if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-160, 0, 96); }
-        var parked = CC.vehicles.make(S.scene, 'sprint', -152, 104, Math.PI / 2, 0xE0433A);
-        void parked;
+        var parkedCar = CC.vehicles.make(S.scene, 'sprint', -152, 104, Math.PI / 2, 0xE0433A);
+        CC.vehicles.parked.push({ key: 'sprint', def: CC.config.vehicles.sprint, mesh: parkedCar.mesh, x: -152, z: 104, heading: Math.PI / 2, driver: false, colour: 0xE0433A });
         S.health = 100; S.armour = 25;
         S.objective = null;
         CC.camera3.shotCam = { pos: [-172, 5, 114], look: [-110, 4, 30] };
