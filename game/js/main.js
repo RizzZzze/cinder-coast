@@ -325,7 +325,11 @@
         S.player.inVehicle = false;
         if (S.player.mesh) { S.player.mesh.visible = true; S.player.mesh.position.set(-196, 0, 228); }
         CC.wanted.setHeat(180);
-        CC.wanted.lastKnown = { x: -200, z: 220 };
+        // BRIEF-07 round 6: the roadblock sits east of the van's occlusion
+        // cone — with the van 12 m from the camera it hid the cruisers
+        // behind it. Cruisers now at -194/-186/-178, clear of the van and
+        // of the pause menu.
+        CC.wanted.lastKnown = { x: -186, z: 220 };
         CC.police.makeRoadblock();
         // BRIEF-07: the SWAT van stands in the true foreground, large and
         // broadside, 12 m from the camera, with a big legible SWAT sign on
@@ -374,7 +378,7 @@
         if (CC.fx) { CC.fx.tracer(-196, 1.4, 236, -196, 1.2, 228); CC.fx.muzzle(-196, 1.4, 236); }
         S.objective = { text: 'Escape the roadblock', tx: -200, tz: 280, kind: 'mission' };
         S.objectiveDist = 58;
-        CC.camera3.shotCam = { pos: [-209, 3.2, 198], look: [-182, 2, 222] };
+        CC.camera3.shotCam = { pos: [-208, 3.2, 198], look: [-182, 2, 222] };
         if (CC.menu) CC.menu.showPause();
         S.mode = 'pause';
       }
