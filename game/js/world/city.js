@@ -48,8 +48,9 @@
             pparts.push({ shape: 'box', w: pw, h: 0.04, d: pw * prng.range(0.6, 1), x: cx, y: 0.02, z: cz, color: tones[Math.floor(prng.range(0, tones.length))] });
           }
         }
-        // Plaza slabs at the market and the quay, the two on-foot areas.
-        [[-150, 92, 46, 30], [-120, 108, 30, 18], [-210, 244, 44, 28], [-180, 210, 26, 16]].forEach(function (pl) {
+        // Plaza slabs at the market and the quay, the two on-foot areas,
+        // plus paved shoulders flanking the bridge deck approach.
+        [[-150, 92, 46, 30], [-120, 108, 30, 18], [-210, 244, 44, 28], [-180, 210, 26, 16], [-20, -360, 14, 44], [20, -360, 14, 44]].forEach(function (pl) {
           pparts.push({ shape: 'box', w: pl[2], h: 0.04, d: pl[3], x: pl[0], y: 0.02, z: pl[1], color: tones[Math.floor(prng.range(0, tones.length))] });
         });
         // Crosswalks at every central junction: white stripes across both
@@ -66,6 +67,7 @@
         }
         var pave = CC.geo.meshFromParts(pparts);
         pave.receiveShadow = true;
+        pave.castShadow = false;
         scene.add(pave);
       })();
       roads.forEach(function (r) {

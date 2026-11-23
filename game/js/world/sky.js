@@ -18,6 +18,8 @@
       sunLight.position.set(-220, 55, 120);
       sunLight.castShadow = true;
       sunLight.shadow.mapSize.set(2048, 2048);
+      sunLight.shadow.bias = -0.0002;
+      sunLight.shadow.normalBias = 0.06;
       sunLight.shadow.camera.left = -70; sunLight.shadow.camera.right = 70;
       sunLight.shadow.camera.top = 70; sunLight.shadow.camera.bottom = -70;
       sunLight.shadow.camera.far = 600;

@@ -189,7 +189,14 @@
   };
   F.headlightGlow = function (v) {
     if (!v || !v.mesh || v._headlights) return;
-    var mat = new THREE.SpriteMaterial({ color: 0xFFF2B0, transparent: true, opacity: 0.5, depthWrite: false });
+    // A radial-gradient texture, so the glow is a soft disc, never a
+    // white square (a bare SpriteMaterial renders as a solid quad).
+    var cv = document.createElement('canvas'); cv.width = 64; cv.height = 64;
+    var cx = cv.getContext('2d');
+    var g = cx.createRadialGradient(32, 32, 2, 32, 32, 30);
+    g.addColorStop(0, 'rgba(255,242,176,0.9)'); g.addColorStop(0.4, 'rgba(255,220,120,0.45)'); g.addColorStop(1, 'rgba(255,220,120,0)');
+    cx.fillStyle = g; cx.fillRect(0, 0, 64, 64);
+    var mat = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, opacity: 0.85, depthWrite: false });
     [-0.6, 0.6].forEach(function (dx) {
       var sp = new THREE.Sprite(mat);
       sp.scale.set(1.4, 1.4, 1);

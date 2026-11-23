@@ -214,7 +214,7 @@
         S.objective = { text: 'Lose the Ardents and reach the Glasswing', tx: 240, tz: 80, kind: 'mission' };
         S.objectiveDist = 62;
         if (CC.notify) { CC.notify.push('Heat +15: vehicle reported'); }
-        CC.camera3.shotCam = { pos: [264, 9, -62], look: [240, 2, 2] };
+        CC.camera3.shotCam = { pos: [260, 7, -56], look: [241, 2, 4] };
       } else if (name === 'foot') {
         S.player.x = -150; S.player.z = 92; S.player.heading = 0.6;
         S.player.inVehicle = false;
@@ -231,7 +231,7 @@
         CC.traffic.spawnNear(S.scene, -150, 92, CC.rng.make(S.seed + 606));
         S.health = 100; S.armour = 25;
         S.objective = null;
-        CC.camera3.shotCam = { pos: [-158, 5, 120], look: [-138, 2, 78] };
+        CC.camera3.shotCam = { pos: [-152, 6, 128], look: [-128, 2, 80] };
       } else if (name === 'mission') {
         var tow = placePlayerCar(S, 'tow', 0, -380, Math.PI, 0xE8A33D);
         tow.speed = 10;
@@ -258,15 +258,15 @@
         CC.wanted.lastKnown = { x: -200, z: 220 };
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
-        if (swat) { swat.x = -196; swat.z = 252; swat.mesh.position.set(-196, 0, 252); swat.mesh.rotation.y = Math.PI / 2; }
-        staticCar(S, 'swat', -212, 230, Math.PI / 2);
+        if (swat) { swat.x = -180; swat.z = 240; swat.mesh.position.set(-180, 0, 240); swat.mesh.rotation.y = Math.PI / 2; }
+        staticCar(S, 'swat', -187, 222, Math.PI / 2);
         // A SWAT sign on the van's camera-facing side, so the van reads
         // unmistakably and is never mistaken for a civilian truck.
         var swatSign = CC.geo.textSign('SWAT', 4, 0.8);
-        swatSign.position.set(-212, 1.5, 228.8);
+        swatSign.position.set(-187, 1.5, 220.7);
         swatSign.rotation.y = Math.PI;
         S.scene.add(swatSign);
-        staticCar(S, 'quill', -240, 214, Math.PI / 2, 0x7FA8C9);
+        staticCar(S, 'quill', -168, 231.5, Math.PI / 2, 0x7FA8C9);
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
