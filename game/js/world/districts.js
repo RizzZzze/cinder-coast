@@ -51,6 +51,7 @@
       CC.districts.buildLanternPark(group, seed);
       CC.districts.buildSunfield(group, seed);
       CC.districts.buildHeights(group, seed);
+      CC.districts.buildIronbridge(group, seed);
     },
     buildMercado: function (group, seed) {
       var rng = CC.rng.make(seed + 700);
@@ -219,6 +220,56 @@
       if (f.t <= 0) { f.t = 0; f.dir = 1; }
       var z = -390 - f.t * 130;
       f.mesh.position.set(120, 0.8 + f.t * 6, z);
+    },
+    buildIronbridge: function (group, seed) {
+      var rng = CC.rng.make(seed + 740);
+      var parts = [];
+      // Rail yard: three parallel lines running north-south, rails on sleepers.
+      [-300, -280, -260].forEach(function (rx) {
+        [-1, 1].forEach(function (off) {
+          parts.push({ shape: 'box', w: 0.3, h: 0.3, d: 170, x: rx + off * 0.8, y: 0.3, z: -40, color: 0x2B2B33 });
+        });
+        for (var sz = -120; sz <= 40; sz += 8) {
+          parts.push({ shape: 'box', w: 3.4, h: 0.15, d: 1.2, x: rx, y: 0.12, z: sz, color: 0x8A6B4A });
+        }
+      });
+      // Freight cars standing on the lines, boxes on wheels, all grounded.
+      [[-300, -100], [-280, -60], [-260, -90]].forEach(function (fc, i) {
+        parts.push({ shape: 'box', w: 3, h: 3, d: 10, x: fc[0], y: 2.2, z: fc[1], color: [0xC8643B, 0x2BB3B0, 0x5E9A4A][i] });
+        parts.push({ shape: 'box', w: 3.2, h: 0.4, d: 10.2, x: fc[0], y: 3.9, z: fc[1], color: 0x2B2B33 });
+        CC.spatial.addBox(fc[0], fc[1], 1.6, 5.2);
+      });
+      // Factories with sawtooth roofs: sloped slabs in a row on each roof.
+      var factories = [[-300, 10, 30, 20, 14], [-268, 24, 26, 18, 17]];
+      factories.forEach(function (f) {
+        parts.push({ shape: 'box', w: f[2], h: f[4], d: f[3], x: f[0], y: f[4] / 2, z: f[1], color: 0x8A8F98 });
+        for (var k = -1; k <= 1; k++) {
+          parts.push({ shape: 'box', w: f[2] / 3, h: 0.4, d: f[3], x: f[0] + k * f[2] / 3, y: f[4] + 1.2, z: f[1], rz: 0.35, color: 0x5A5A62 });
+        }
+        CC.spatial.addBox(f[0], f[1], f[2] / 2, f[3] / 2);
+      });
+      // Chimneys, from the ground to above the factory roofs.
+      [[-312, 20, 24], [-258, 34, 28]].forEach(function (ch) {
+        parts.push({ shape: 'cyl', rTop: 1.2, rBot: 1.8, h: ch[2], seg: 10, x: ch[0], y: ch[2] / 2, z: ch[1], color: 0xB9B1A3 });
+      });
+      // Scrap heaps: rusted cones piled on the ground.
+      [[-290, -20, 7, 5], [-272, -110, 8, 6], [-306, -60, 6, 4]].forEach(function (sc) {
+        parts.push({ shape: 'cone', r: sc[2], h: sc[3], seg: 10, x: sc[0], y: sc[3] / 2, z: sc[1], color: 0x8A5A40 });
+        CC.spatial.addBox(sc[0], sc[1], sc[2] * 0.7, sc[2] * 0.7);
+      });
+      // Container stacks.
+      var contCols = [0xC8643B, 0x2BB3B0, 0xF2A81D];
+      for (var ci = 0; ci < 9; ci++) {
+        parts.push({ shape: 'box', w: 6, h: 2.6, d: 2.6, x: -312 + (ci % 3) * 8, y: 1.3 + Math.floor(ci / 3) * 2.7, z: -120 + Math.floor(ci / 3) * 4, color: contCols[ci % 3] });
+      }
+      // Rail crossing at (-240, 0): striped barrier arms on posts, warning sign.
+      [-6, 6].forEach(function (off) {
+        parts.push({ shape: 'box', w: 0.4, h: 3.4, d: 0.4, x: -240 + off, y: 1.7, z: 6, color: 0xF4E6C8 });
+        parts.push({ shape: 'box', w: 5, h: 0.5, d: 0.3, x: -240 + off, y: 3.2, z: 6, color: 0xE0433A });
+      });
+      parts.push({ shape: 'box', w: 0.4, h: 4, d: 0.4, x: -234, y: 2, z: -6, color: 0x2B2B33 });
+      parts.push({ shape: 'box', w: 2, h: 2, d: 0.2, x: -234, y: 4.6, z: -6, color: 0xF2A81D });
+      flush(parts, group);
     }
   };
 })();
