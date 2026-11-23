@@ -237,6 +237,7 @@
         CC.police.makeRoadblock();
         var swat = CC.police.spawnUnit('swat');
         if (swat) { swat.x = -210; swat.z = 234; swat.mesh.position.set(-210, 0, 234); swat.mesh.rotation.y = Math.PI / 2; }
+        staticCar(S, 'swat', -205, 240, Math.PI / 2);
         var flank = CC.police.spawnUnit('cruiser');
         if (flank) { flank.x = -196; flank.z = 246; flank.heading = Math.PI / 2; flank.mesh.position.set(-196, 0, 246); flank.mesh.rotation.y = Math.PI / 2; }
         heliOver(S, -210, 245, 55);
