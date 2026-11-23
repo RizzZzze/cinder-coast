@@ -25,6 +25,8 @@
       var S = CC.S;
       if (!S || S.mode !== 'play') return;
       var seen = false;
+      // At 5 stars the helicopter orbits overhead and never loses sight.
+      if (S.heli) seen = true;
       if (S.police) {
         for (var i = 0; i < S.police.length; i++) {
           var u = S.police[i];

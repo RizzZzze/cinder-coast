@@ -88,7 +88,14 @@
         if (dist) dist.textContent = Math.round(d) + ' m';
       } else if (dist) dist.textContent = '';
       var ch = el('crosshair');
-      if (ch) ch.style.display = (CC.input.state.aim && !S.vehicle) ? 'block' : 'none';
+      if (ch) {
+        ch.style.display = (CC.input.state.aim && !S.vehicle) ? 'block' : 'none';
+        if (CC.weapons) {
+          var sp = CC.weapons.getSpread();
+          var aim = CC.input.state.aim ? 0.7 : 1;
+          ch.style.fontSize = Math.round((28 + sp * 400) * aim) + 'px';
+        }
+      }
       CC.hud.refreshStars();
     }
   };
