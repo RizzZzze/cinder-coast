@@ -15,6 +15,7 @@
         speed: 0, steer: 0, damage: 0, hot: false, owned: false,
         towed: null, engineOn: true, smokeTimer: 0
       };
+      if (CC.progress) CC.progress.applyUpgrades(v);
       return v;
     },
     buildParked: function (scene, seed) {

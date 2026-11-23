@@ -8,6 +8,7 @@
       cash: S.cash, standing: S.standing, chapter: S.chapter,
       missionFlags: S.missionFlags || {}, garage: S.garage || [],
       ammo: S.ammo, timeOfDay: S.timeOfDay, seed: S.seed,
+      ownedWeapons: S.ownedWeapons || ['kestrel'], upgrades: S.upgrades || {},
       vehicleKey: S.vehicle ? S.vehicle.key : null,
       options: S.options || {}
     };
@@ -51,6 +52,13 @@
       S.cash = d.cash; S.standing = d.standing; S.chapter = d.chapter;
       S.missionFlags = d.missionFlags || {}; S.garage = d.garage || [];
       if (d.ammo) S.ammo = d.ammo;
+      if (d.ownedWeapons) {
+        S.ownedWeapons = d.ownedWeapons;
+        d.ownedWeapons.forEach(function (k) {
+          if (CC.weapons.order.indexOf(k) < 0) CC.weapons.order.push(k);
+        });
+      }
+      if (d.upgrades) S.upgrades = d.upgrades;
       S.timeOfDay = d.timeOfDay || 16.5;
       if (d.options) S.options = d.options;
       if (d.vehicleKey && CC.vehicles) {

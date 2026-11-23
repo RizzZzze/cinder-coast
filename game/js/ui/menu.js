@@ -5,7 +5,7 @@
   function hide(id) { var e = document.getElementById(id); if (e) e.style.display = 'none'; }
   CC.menu = {
     hideAll: function () {
-      ['title-screen', 'pause-menu', 'options-panel', 'controls-panel', 'credits-panel', 'result-card', 'death-card', 'fullmap'].forEach(hide);
+      ['title-screen', 'pause-menu', 'options-panel', 'controls-panel', 'credits-panel', 'result-card', 'death-card', 'fullmap', 'shop-panel'].forEach(hide);
       var hud = document.getElementById('hud');
       if (hud) hud.style.display = 'block';
     },
@@ -21,6 +21,7 @@
     togglePause: function () {
       var S = CC.S;
       if (!S) return;
+      if (S.mode === 'shop') { CC.menu.hideShop(); return; }
       if (S.mode === 'play') {
         S.mode = 'pause'; show('pause-menu');
         if (document.pointerLockElement) document.exitPointerLock();
@@ -39,6 +40,66 @@
     hideControls: function () { hide('controls-panel'); },
     showCredits: function () { show('credits-panel'); },
     hideCredits: function () { hide('credits-panel'); },
+    showShop: function (kind) {
+      var S = CC.S;
+      if (!S) return;
+      S.mode = 'shop';
+      var title = document.getElementById('shop-title');
+      var list = document.getElementById('shop-list');
+      if (!title || !list) return;
+      list.innerHTML = '';
+      if (kind === 'gun') {
+        title.textContent = 'Mercado Gun Shop — ' + S.cash + ' cr';
+        CC.config.gunShop.stock.forEach(function (item) {
+          var def = CC.config.weapons[item.key];
+          var owned = CC.progress.ownedWeapons().indexOf(item.key) >= 0;
+          var locked = S.chapter < item.chapter || S.standing < item.standing;
+          var b = document.createElement('button');
+          b.textContent = def.name + ' — ' + (owned ? 'OWNED' : item.price + ' cr') +
+            (locked ? ' (needs Ch ' + item.chapter + ', Standing ' + item.standing + ')' : '');
+          b.disabled = owned || locked;
+          b.addEventListener('click', function () {
+            if (CC.progress.buyWeapon(item.key)) CC.menu.showShop('gun');
+          });
+          list.appendChild(b);
+        });
+      } else {
+        title.textContent = 'Mercado Garage — ' + S.cash + ' cr';
+        var key = S.vehicle ? S.vehicle.key : null;
+        if (key) {
+          ['engine', 'grip', 'armour'].forEach(function (kind2) {
+            var lvl = CC.progress.upgradeLevel(key, kind2);
+            var b = document.createElement('button');
+            b.textContent = CC.config.vehicles[key].name + ' ' + kind2 + ' tier ' + lvl + '/3' +
+              (lvl >= 3 ? ' — MAX' : ' — next ' + CC.config.upgradeTiers[lvl].price + ' cr');
+            b.disabled = lvl >= 3;
+            b.addEventListener('click', function () {
+              if (CC.progress.buyUpgrade(key, kind2)) CC.menu.showShop('garage');
+            });
+            list.appendChild(b);
+          });
+        } else {
+          var p = document.createElement('p');
+          p.textContent = 'Bring a vehicle to fit upgrades.';
+          list.appendChild(p);
+        }
+        (S.garage || []).forEach(function (gk) {
+          var b2 = document.createElement('button');
+          b2.textContent = 'Recall ' + CC.config.vehicles[gk].name + ' from the garage';
+          b2.addEventListener('click', function () {
+            if (CC.progress.recallVehicle(gk)) CC.menu.hideShop();
+          });
+          list.appendChild(b2);
+        });
+      }
+      show('shop-panel');
+      if (document.pointerLockElement) document.exitPointerLock();
+    },
+    hideShop: function () {
+      hide('shop-panel');
+      var S = CC.S;
+      if (S && S.mode === 'shop') S.mode = 'play';
+    },
     showResult: function (ok, name, payout, standing, reason) {
       var S = CC.S;
       if (S) S.mode = 'result';
@@ -75,7 +136,7 @@
       on('btn-result-retry', function () {
         CC.menu.hideResult();
         var S = CC.S;
-        if (S) { S.mode = 'play'; if (S.lastMission === 1) CC.missions.startMission1(); }
+        if (S) { S.mode = 'play'; CC.missions.startMission(S.lastMission || 1); }
       });
       on('btn-result-continue', function () {
         CC.menu.hideResult();
@@ -91,7 +152,22 @@
         var S = CC.S;
         if (S) { S.lastMission = 1; CC.missions.startMission1(); }
       });
+      [2, 3, 4, 5, 6, 7, 8].forEach(function (n) {
+        on('btn-mission' + n, function () {
+          var S = CC.S;
+          if (S) {
+            if (S.mode === 'title') {
+              if (CC.save.hasSave()) CC.main.continueGame(); else CC.main.newGameNoMission();
+              S = CC.S;
+            }
+            if (!CC.missions.startMission(n) && CC.notify) CC.notify.push('Mission ' + n + ' unlocks in Chapter ' + n);
+          }
+        });
+      });
       on('btn-towcall', function () { CC.activities.startTowCall(); });
+      on('btn-courier', function () { CC.activities.startCourier(); });
+      on('btn-chop', function () { CC.activities.startChop(); });
+      on('btn-shop-close', function () { CC.menu.hideShop(); });
       var vol = document.getElementById('opt-master');
       if (vol) vol.addEventListener('input', function () { if (CC.audio) CC.audio.setMaster(parseFloat(vol.value)); });
       var mus = document.getElementById('opt-music');

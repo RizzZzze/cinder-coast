@@ -23,7 +23,7 @@
       if (input.right) steerTarget = -1;
       var steerRate = input.handbrake ? 4 : 2.6;
       v.steer += (steerTarget * cfg.steerMax * (1 - speedRatio * 0.55) - v.steer) * Math.min(1, dt * steerRate);
-      var grip = (input.handbrake ? cfg.handbrakeGrip : cfg.grip) * (def.handling || 1);
+      var grip = (input.handbrake ? cfg.handbrakeGrip : cfg.grip) * (def.handling || 1) * (v.upgradeGrip || 1);
       var turn = v.steer * (v.speed / top) * 2.4 * grip;
       if (v.speed < 0) turn = -turn;
       v.heading += turn * dt * (Math.abs(v.speed) > 0.1 ? 1 : 0);
@@ -33,7 +33,7 @@
       var hit = CC.spatial.collideCircle(nx, nz, def.wid / 2 + 0.3);
       if (hit) {
         v.speed *= -0.35;
-        v.damage += Math.min(25, Math.abs(v.speed) * 0.4 + 4);
+        v.damage += Math.min(25, Math.abs(v.speed) * 0.4 + 4) * (CC.progress ? CC.progress.armourFactor(v) : 1);
         if (CC.fx) CC.fx.sparks(nx, nz);
         if (CC.sfx) CC.sfx.impact(Math.min(1, Math.abs(v.speed) / 20));
         if (CC.S) CC.S.crashTimer = 1.5;
@@ -48,7 +48,7 @@
           var push = (3.2 - d) / 2;
           var dx = (v.x - c.x) / d, dz = (v.z - c.z) / d;
           v.x += dx * push; v.z += dz * push;
-          v.speed *= 0.55; v.damage += 6;
+          v.speed *= 0.55; v.damage += 6 * (CC.progress ? CC.progress.armourFactor(v) : 1);
           if (CC.fx) CC.fx.sparks(v.x, v.z);
           if (CC.S) { CC.S.crashTimer = 1.5; }
         }

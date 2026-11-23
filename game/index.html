@@ -45,9 +45,18 @@
     <button id="btn-credits">Credits</button>
     <div class="mission-list">
       <button id="btn-mission1">Mission 1 — Wrong Tow</button>
+      <button id="btn-mission2">Mission 2 — Dead Drop</button>
+      <button id="btn-mission3">Mission 3 — Pier Nine</button>
+      <button id="btn-mission4">Mission 4 — Glass Floor</button>
+      <button id="btn-mission5">Mission 5 — Convoy</button>
+      <button id="btn-mission6">Mission 6 — Funicular</button>
+      <button id="btn-mission7">Mission 7 — Lantern Light</button>
+      <button id="btn-mission8">Mission 8 — Tidewater</button>
       <button id="btn-towcall">Activity — Tow Call</button>
+      <button id="btn-courier">Activity — Courier Run</button>
+      <button id="btn-chop">Activity — Chop Order</button>
     </div>
-    <p class="hint">Stage 1: Saltmarsh Quay and the Corvane Bridge approach. Missions 2–8 arrive in Stage 2.</p>
+    <p class="hint">Stage 2: all six districts, Missions 2–8, Courier Runs and Chop Orders. Gun shop and garage in Old Mercado, safehouses in the Quay and the Heights.</p>
   </div>
 </div>
 <div id="pause-menu" class="panel-screen" style="display:none">
@@ -86,6 +95,13 @@
     <h2>Credits</h2>
     <p>Cinder Coast — an original game. City, characters, vehicles, story, music and sound all original. Built with Three.js (MIT). No Rockstar / GTA content.</p>
     <button id="btn-credits-close">Close</button>
+  </div>
+</div>
+<div id="shop-panel" class="panel-screen" style="display:none">
+  <div class="panel">
+    <h2 id="shop-title">Gun Shop</h2>
+    <div id="shop-list"></div>
+    <button id="btn-shop-close">Close</button>
   </div>
 </div>
 <div id="result-card" class="panel-screen" style="display:none">
@@ -138,6 +154,7 @@
 <script src="js/missions/missions.js"></script>
 <script src="js/missions/story.js"></script>
 <script src="js/missions/activities.js"></script>
+<script src="js/missions/progression.js"></script>
 <script src="js/ui/hud.js"></script>
 <script src="js/ui/minimap.js"></script>
 <script src="js/ui/menu.js"></script>

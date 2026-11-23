@@ -22,6 +22,9 @@
       police: [], roadblock: null, waypoint: null, objectiveText: '',
       gunfireTimer: 0, crashTimer: 0, shake: 0, lastDamageAt: -99,
       outOfSightFor: 0, lastSeenAt: 0, dead: false, hijacking: false,
+      ownedWeapons: ['kestrel'], upgrades: {}, lastSafeX: -136, lastSafeZ: 210,
+      gateWarnedAt: -99, nearShop: null, missionHaul: null, missionHaulEngine: 100,
+      missionNomad: null, missionTargets: null,
       northUp: false, speedUnit: 'km/h', sensitivity: 1, lastMission: 1,
       options: { master: 0.8, music: 0.6, sfx: 0.8 },
       feedLog: [], scene: null, shotMode: !!shotName
@@ -49,6 +52,7 @@
     CC.chunks.register(scene);
     CC.vehicles.buildParked(scene, seed);
     CC.fx.init(scene);
+    if (CC.damage) CC.damage.buildPickups(scene);
     S.player.mesh = CC.player.buildMesh(scene);
     S.player.mesh.position.set(S.player.x, 0, S.player.z);
     var tow = CC.vehicles.make(scene, 'tow', -140, 210, Math.PI, 0xE8A33D);
@@ -65,6 +69,23 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
+    var testMission = parseInt(params.get('test') || '0', 10) || 0;
+    if (testMission) {
+      S.mode = 'play';
+      CC.menu.hideAll();
+      S.chapter = Math.max(S.chapter, testMission);
+      var tp = { 2: [-150, -30], 3: [-136, 210], 4: [300, -150], 5: [180, -300], 6: [120, -390], 7: [0, -188], 8: [-270, -30] }[testMission];
+      if (tp) {
+        S.player.x = tp[0]; S.player.z = tp[1];
+        if (S.player.mesh) S.player.mesh.position.set(tp[0], 0, tp[1]);
+      }
+      if (testMission === 5) {
+        var tt = CC.vehicles.make(scene, 'tow', 180, -300, Math.PI, 0xE8A33D);
+        S.vehicle = tt; S.player.inVehicle = true;
+      }
+      CC.missions.startMission(testMission);
+      window.__testMission = testMission;
+    }
     clock = new THREE.Clock();
     if (shotName) {
       CC.main.applyShot(shotName);
@@ -201,7 +222,11 @@
           if (near && !near.driver) { CC.ownership.tryHijack(); }
         }
         if (input.interact) {
-          if (S.mission && S.mission.id === 1 && S.mission.stage === 1) CC.missions.tryHook();
+          if (S.nearShop === 'gun') CC.menu.showShop('gun');
+          else if (S.nearShop === 'garage') CC.menu.showShop('garage');
+          else if (S.nearShop === 'safehouse') CC.progress.useSafehouse();
+          else if (S.mission && CC.missions.tryInteract()) { /* mission interact */ }
+          else if (S.mission && S.mission.id === 1 && S.mission.stage === 1) CC.missions.tryHook();
           else if (S.activity) CC.activities.tryHook();
           else if (!S.vehicle) CC.ownership.tryHijack();
         }
@@ -212,6 +237,12 @@
           if (CC.audio) CC.audio.setEngine(Math.min(1, Math.abs(S.vehicle.speed) / S.vehicle.def.top));
         } else if (CC.audio) CC.audio.setEngine(0);
         CC.weapons.update(dt);
+        CC.enemies.update(dt);
+        CC.districts.update(dt);
+        CC.damage.update(dt);
+        if (CC.quality) CC.quality.update(dt);
+        CC.progress.checkGate();
+        CC.progress.update();
         CC.missions.update(dt);
         CC.activities.update(dt);
         if (input.aim) { /* aiming handled by camera + crosshair */ }
@@ -229,7 +260,10 @@
       if (S.stars >= 1) CC.sfx.setSiren(true); else CC.sfx.setSiren(false);
       if (!S.shotMode) {
         var nearP = CC.vehicles.nearestParked(S.player.x, S.player.z, 4);
-        if (S.vehicle) CC.hud.showPrompt('E: Exit  ·  H: Horn');
+        if (S.nearShop === 'gun') CC.hud.showPrompt('F: Gun Shop');
+        else if (S.nearShop === 'garage') CC.hud.showPrompt('F: Garage');
+        else if (S.nearShop === 'safehouse') CC.hud.showPrompt('F: Rest & Save');
+        else if (S.vehicle) CC.hud.showPrompt('E: Exit  ·  H: Horn');
         else if (nearP) CC.hud.showPrompt('F: Hijack');
         else if (S.mission && S.mission.stage === 1) CC.hud.showPrompt('F: Hook the car');
         else CC.hud.showPrompt('');
@@ -274,6 +308,22 @@
       CC.hud.refreshWeapon();
       CC.hud.refreshStars();
       CC.missions.startMission1();
+      if (CC.audio) CC.audio.unlock();
+    },
+    newGameNoMission: function () {
+      var keepScene = CC.S.scene;
+      if (CC.S.player.mesh) keepScene.remove(CC.S.player.mesh);
+      if (CC.S.startTow && CC.S.startTow.mesh) keepScene.remove(CC.S.startTow.mesh);
+      CC.S = newState();
+      CC.S.scene = keepScene;
+      CC.S.player.mesh = CC.player.buildMesh(keepScene);
+      CC.S.player.mesh.position.set(CC.S.player.x, 0, CC.S.player.z);
+      var tow = CC.vehicles.make(keepScene, 'tow', -140, 210, Math.PI, 0xE8A33D);
+      CC.S.startTow = tow;
+      CC.S.mode = 'play';
+      CC.menu.hideAll();
+      CC.hud.refreshWeapon();
+      CC.hud.refreshStars();
       if (CC.audio) CC.audio.unlock();
     },
     continueGame: function () {

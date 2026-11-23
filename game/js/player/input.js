@@ -26,6 +26,7 @@
         if (e.code === 'Digit2') CC.weapons.select(1);
         if (e.code === 'Digit3') CC.weapons.select(2);
         if (e.code === 'Digit4') CC.weapons.select(3);
+        if (e.code === 'Digit5') CC.weapons.select(4);
         if (CC.audio) CC.audio.unlock();
       });
       window.addEventListener('keyup', function (e) { keys[e.code] = false; });
